@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADHS Selbsteinschätzung</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #6C5CE7;
+      --primary-dark: #5249C8;
+      --primary-light: #A29BFE;
+      --primary-bg: #F0EEFF;
+      --teal: #00B894;
+      --orange: #E17055;
+      --red: #D63031;
+      --yellow: #FDCB6E;
+      --blue: #0984E3;
+      --white: #FFFFFF;
+      --gray-50: #F8F9FA;
+      --gray-100: #F1F3F5;
+      --gray-200: #E9ECEF;
+      --gray-300: #DEE2E6;
+      --gray-500: #ADB5BD;
+      --gray-600: #868E96;
+      --gray-700: #495057;
+      --gray-800: #343A40;
+      --gray-900: #212529;
+      --shadow: 0 4px 24px rgba(108, 92, 231, 0.14);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 8px 40px rgba(108, 92, 231, 0.2);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-xs: 6px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(160deg, #F0EEFF 0%, #E8F4FD 50%, #EEF9F5 100%);
+      min-height: 100vh;
+      color: var(--gray-900);
+      line-height: 1.65;
+    }
+
+    .app-wrapper {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    /* ── Header ── */
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .app-logo {
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .app-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-dark); line-height: 1.2; }
+    .app-subtitle { font-size: 0.78rem; color: var(--gray-600); }
+
+    /* ── Progress ── */
+    .progress-wrap {
+      margin-bottom: 24px;
+    }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      margin-bottom: 8px;
+    }
+    .progress-bar-bg {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-light), var(--primary));
+      border-radius: 99px;
+      transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px;
+      margin-bottom: 20px;
+    }
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+    .card-subtitle {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      color: var(--gray-700);
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    /* ── Disclaimer ── */
+    .disclaimer {
+      background: #FFF8E1;
+      border-left: 4px solid var(--yellow);
+      border-radius: var(--radius-xs);
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      color: #7B6003;
+      line-height: 1.5;
+      margin: 20px 0;
+    }
+    .disclaimer strong { display: block; margin-bottom: 4px; }
+
+    /* ── Info boxes ── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .info-box {
+      background: var(--primary-bg);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .info-box .icon { font-size: 1.5rem; margin-bottom: 6px; display: block; }
+    .info-box .label { font-size: 0.78rem; color: var(--primary-dark); font-weight: 600; }
+    .info-box .value { font-size: 0.9rem; color: var(--gray-700); }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 28px;
+      border-radius: 99px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 16px rgba(108,92,231,0.35);
+    }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(108,92,231,0.4); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-outline {
+      background: transparent;
+      color: var(--gray-700);
+      border: 2px solid var(--gray-300);
+    }
+    .btn-outline:hover { border-color: var(--primary-light); color: var(--primary); }
+    .btn-ghost {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    .btn-ghost:hover { background: var(--gray-200); }
+    .btn-lg { padding: 16px 36px; font-size: 1.05rem; }
+    .btn-sm { padding: 9px 18px; font-size: 0.88rem; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+    .btn-row .spacer { flex: 1; }
+
+    /* ── Context Questions ── */
+    .context-question {
+      margin-bottom: 24px;
+    }
+    .context-question label {
+      display: block;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+    .context-options {
+      display: grid;
+      gap: 8px;
+    }
+    .context-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      background: var(--white);
+    }
+    .context-option:hover { border-color: var(--primary-light); background: var(--primary-bg); }
+    .context-option.selected { border-color: var(--primary); background: var(--primary-bg); }
+    .context-option input { display: none; }
+    .context-radio {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--gray-300);
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.18s ease;
+    }
+    .context-option.selected .context-radio {
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+    .context-option.selected .context-radio::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      display: block;
+    }
+    .context-option-label { font-size: 0.92rem; color: var(--gray-800); }
+
+    /* ── Likert Questions ── */
+    .question-block {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .question-block:last-child { border-bottom: none; }
+    .question-text {
+      font-size: 0.97rem;
+      color: var(--gray-800);
+      margin-bottom: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .question-num {
+      display: inline-block;
+      width: 26px;
+      height: 26px;
+      background: var(--primary-bg);
+      color: var(--primary);
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 26px;
+      margin-right: 8px;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+    .likert-scale {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+    .likert-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .likert-option input { display: none; }
+    .likert-btn {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--gray-200);
+      background: var(--gray-50);
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.18s ease;
+      cursor: pointer;
+      max-height: 52px;
+    }
+    .likert-option:hover .likert-btn { border-color: var(--primary-light); background: var(--primary-bg); }
+    .likert-option.selected .likert-btn { border-color: var(--primary); background: var(--primary); }
+    .likert-label {
+      font-size: 0.68rem;
+      color: var(--gray-600);
+      text-align: center;
+      line-height: 1.2;
+    }
+    .likert-option.selected .likert-label { color: var(--primary); font-weight: 600; }
+
+    /* Coloured likert when selected */
+    .likert-option[data-val="0"].selected .likert-btn { border-color: #00B894; background: #00B894; }
+    .likert-option[data-val="1"].selected .likert-btn { border-color: #81ECEC; background: #81ECEC; }
+    .likert-option[data-val="2"].selected .likert-btn { border-color: #FDCB6E; background: #FDCB6E; }
+    .likert-option[data-val="3"].selected .likert-btn { border-color: #E17055; background: #E17055; }
+    .likert-option[data-val="4"].selected .likert-btn { border-color: #D63031; background: #D63031; }
+
+    /* ── Section Header ── */
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--gray-100);
+    }
+    .section-icon {
+      font-size: 2.2rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .section-title { font-size: 1.35rem; font-weight: 800; color: var(--gray-900); line-height: 1.2; }
+    .section-badge {
+      display: inline-block;
+      background: var(--primary-bg);
+      color: var(--primary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .section-desc {
+      font-size: 0.87rem;
+      color: var(--gray-600);
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    /* ── Validation warning ── */
+    .validation-msg {
+      background: #FFF0F0;
+      border: 1px solid #FFC9C9;
+      color: #C0392B;
+      border-radius: var(--radius-xs);
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      margin-top: 12px;
+      display: none;
+    }
+    .validation-msg.visible { display: block; }
+
+    /* ── Results ── */
+    .result-hero {
+      text-align: center;
+      padding: 36px 24px;
+    }
+    .result-emoji { font-size: 4rem; margin-bottom: 16px; display: block; }
+    .result-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-600);
+      margin-bottom: 8px;
+    }
+    .result-title {
+      font-size: 1.7rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .result-desc {
+      font-size: 0.97rem;
+      color: var(--gray-700);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Probability gauge */
+    .gauge-wrap {
+      margin: 28px auto;
+      max-width: 260px;
+      text-align: center;
+    }
+    .gauge-svg { width: 220px; height: 130px; }
+    .gauge-value {
+      font-size: 2.4rem;
+      font-weight: 900;
+      fill: var(--gray-900);
+    }
+    .gauge-unit {
+      font-size: 1rem;
+      fill: var(--gray-600);
+    }
+
+    /* Score breakdown */
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .breakdown-item {
+      background: var(--gray-50);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .breakdown-item .bi-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--gray-600);
+      margin-bottom: 6px;
+    }
+    .breakdown-item .bi-bar-bg {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .breakdown-item .bi-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1s cubic-bezier(.4,0,.2,1);
+    }
+    .breakdown-item .bi-value {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--gray-900);
+    }
+    .breakdown-item .bi-count {
+      font-size: 0.78rem;
+      color: var(--gray-600);
+    }
+
+    /* ADHD type badge */
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 99px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 8px 0;
+    }
+    .type-badge.combined { background: #EDE0FF; color: #6C5CE7; }
+    .type-badge.inattentive { background: #D9F2FF; color: #0984E3; }
+    .type-badge.hyperactive { background: #FFE8D9; color: #E17055; }
+    .type-badge.none { background: var(--gray-100); color: var(--gray-700); }
+
+    /* DSM count */
+    .dsm-count-row {
+      display: flex;
+      gap: 12px;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+    .dsm-pill {
+      flex: 1;
+      min-width: 140px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+    }
+    .dsm-pill .dp-num {
+      font-size: 2rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .dsm-pill .dp-max { font-size: 1rem; color: var(--gray-500); }
+    .dsm-pill .dp-label { font-size: 0.78rem; color: var(--gray-600); margin-top: 4px; }
+    .dp-num.meets { color: var(--primary); }
+    .dp-num.almost { color: var(--orange); }
+    .dp-num.low { color: var(--gray-500); }
+
+    /* Key findings */
+    .findings-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .findings-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--gray-700);
+      padding: 10px 14px;
+      background: var(--gray-50);
+      border-radius: var(--radius-xs);
+      border-left: 3px solid var(--primary-light);
+    }
+    .finding-icon { flex-shrink: 0; font-size: 1rem; }
+
+    /* Sections divider */
+    .section-divider {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-500);
+      margin: 24px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-divider::before, .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--gray-200);
+    }
+
+    /* Welcome features */
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.92rem;
+      color: var(--gray-700);
+    }
+    .feature-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--primary-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    /* Severity colors */
+    .sev-minimal { color: #00B894; }
+    .sev-mild { color: #55EFC4; }
+    .sev-moderate { color: #FDCB6E; }
+    .sev-high { color: #E17055; }
+    .sev-very-high { color: #D63031; }
+
+    /* Print */
+    @media print {
+      body { background: white; }
+      .btn-row, .app-header { display: none; }
+      .card { box-shadow: none; border: 1px solid #ddd; }
+    }
+
+    /* Mobile */
+    @media (max-width: 520px) {
+      .card { padding: 20px 16px; }
+      .likert-scale { gap: 4px; }
+      .likert-label { font-size: 0.6rem; }
+      .breakdown-grid { grid-template-columns: 1fr; }
+      .info-grid { grid-template-columns: 1fr; }
+      .card-title { font-size: 1.25rem; }
+    }
+
+    /* Transitions */
+    .screen-fade { animation: fadeIn 0.35s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Unanswered highlight */
+    .question-block.unanswered { background: #FFF8F8; border-radius: 8px; padding: 14px; margin: -2px; border-left: 3px solid #FFB3B3; }
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+  <header class="app-header">
+    <div class="app-logo">🧩</div>
+    <div>
+      <div class="app-title">ADHS Selbsteinschätzung</div>
+      <div class="app-subtitle">Basierend auf DSM-5 & WHO ASRS v1.1 · Vollständig offline</div>
+    </div>
+  </header>
+
+  <div id="progress-area" style="display:none">
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="progress-label">Abschnitt 1 von 5</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="main-content"></div>
+</div>
+
+<script>
+// ────────────────────────────────────────────────────────────────
+// DATA
+// ────────────────────────────────────────────────────────────────
+
+const LIKERT = [
+  { val: 0, label: 'Nie', emoji: '😌' },
+  { val: 1, label: 'Selten', emoji: '🙂' },
+  { val: 2, label: 'Manchmal', emoji: '😐' },
+  { val: 3, label: 'Oft', emoji: '😟' },
+  { val: 4, label: 'Fast\nimmer', emoji: '😰' },
+];
+
+const IMPACT_LABELS = [
+  { val: 0, label: 'Kein\nProblem', emoji: '✅' },
+  { val: 1, label: 'Gering', emoji: '🟡' },
+  { val: 2, label: 'Mäßig', emoji: '🟠' },
+  { val: 3, label: 'Stark', emoji: '🔴' },
+  { val: 4, label: 'Sehr\nstark', emoji: '⛔' },
+];
+
+const SECTIONS = [
+  {
+    id: 'inattention',
+    title: 'Aufmerksamkeit & Konzentration',
+    badge: 'DSM-5 Kriterium A1',
+    icon: '🧠',
+    desc: 'Die folgenden Aussagen beziehen sich auf die <strong>letzten 6 Monate</strong>. Wie häufig treffen sie auf Sie zu?',
+    type: 'likert',
+    questions: [
+      { id: 'i1', text: 'Ich mache Flüchtigkeitsfehler bei Aufgaben oder Tätigkeiten, weil ich nicht aufmerksam genug hinschaue.' },
+      { id: 'i2', text: 'Es fällt mir schwer, meine Aufmerksamkeit bei Aufgaben oder Freizeitaktivitäten aufrechtzuerhalten.' },
+      { id: 'i3', text: 'Wenn man mich direkt anspricht, scheint es, als ob ich nicht wirklich zuhöre.' },
+      { id: 'i4', text: 'Ich führe Anweisungen nicht vollständig aus und schaffe es nicht, Aufgaben zu Ende zu bringen (nicht wegen mangelndem Verständnis).' },
+      { id: 'i5', text: 'Ich habe Schwierigkeiten, Aufgaben und Aktivitäten zu planen und zu organisieren.' },
+      { id: 'i6', text: 'Ich vermeide oder erledige ungern Aufgaben, die längere geistige Anstrengung erfordern.' },
+      { id: 'i7', text: 'Ich verliere oder verlege Dinge, die ich für Aufgaben oder Aktivitäten benötige (z.B. Schlüssel, Handy, Dokumente, Werkzeug).' },
+      { id: 'i8', text: 'Ich lasse mich durch äußere Reize oder irrelevante Gedanken leicht ablenken.' },
+      { id: 'i9', text: 'Im Alltag bin ich vergesslich (Termine, Rückrufe, Erledigungen).' },
+    ]
+  },
+  {
+    id: 'hyperactivity',
+    title: 'Aktivität & Impulskontrolle',
+    badge: 'DSM-5 Kriterium A2',
+    icon: '⚡',
+    desc: 'Wie häufig treffen folgende Aussagen auf Sie zu? Beziehen Sie sich auf die <strong>letzten 6 Monate</strong>.',
+    type: 'likert',
+    questions: [
+      { id: 'h1', text: 'Ich zappele mit Händen oder Füßen, oder rutsche auf meinem Stuhl herum.' },
+      { id: 'h2', text: 'Ich verlasse meinen Sitz in Situationen, in denen Sitzenbleiben erwartet wird.' },
+      { id: 'h3', text: 'Ich laufe in unpassenden Situationen herum oder habe als Erwachsene/r ein starkes Gefühl innerer Unruhe.' },
+      { id: 'h4', text: 'Es fällt mir schwer, Freizeitaktivitäten ruhig und entspannt zu genießen.' },
+      { id: 'h5', text: 'Ich bin ständig "in Bewegung" oder fühle mich, als wäre ich von einem Motor angetrieben.' },
+      { id: 'h6', text: 'Ich rede übermäßig viel.' },
+      { id: 'h7', text: 'Ich platze mit Antworten heraus, bevor eine Frage zu Ende gestellt wurde.' },
+      { id: 'h8', text: 'Ich habe Schwierigkeiten zu warten, bis ich an der Reihe bin (z.B. in Gesprächen, Warteschlangen).' },
+      { id: 'h9', text: 'Ich unterbreche andere oder mische mich in Gespräche und Aktivitäten ein.' },
+    ]
+  },
+  {
+    id: 'emotional',
+    title: 'Emotionale Regulation',
+    badge: 'Häufige ADHS-Begleiterscheinung',
+    icon: '💭',
+    desc: 'Diese Fragen beziehen sich auf emotionale Erlebnisse und Reaktionsmuster.',
+    type: 'likert',
+    questions: [
+      { id: 'e1', text: 'Ich reagiere extrem intensiv auf wahrgenommene Ablehnung, Kritik oder Enttäuschungen – stärker als andere Menschen in vergleichbaren Situationen. (Rejection Sensitive Dysphoria)' },
+      { id: 'e2', text: 'Meine Stimmung kann sich sehr schnell verändern – von begeistert zu tief frustriert – und wieder zurück.' },
+      { id: 'e3', text: 'Wenn ich mich aufgeregt oder aufgewühlt habe, brauche ich lange, um mich wieder zu beruhigen.' },
+      { id: 'e4', text: 'Ich werde schnell frustriert oder ungeduldig, wenn Dinge nicht sofort so laufen, wie ich es möchte.' },
+      { id: 'e5', text: 'Ich kann mich für neue Dinge sehr schnell begeistern, verliere aber auch genauso schnell das Interesse daran.' },
+    ]
+  },
+  {
+    id: 'executive',
+    title: 'Selbstorganisation & Zeitwahrnehmung',
+    badge: 'Exekutivfunktionen',
+    icon: '🗂️',
+    desc: 'Wie gut gelingt Ihnen alltägliche Planung, Organisation und Selbststeuerung?',
+    type: 'likert',
+    questions: [
+      { id: 'ex1', text: 'Ich vergesse Termine, Deadlines oder wichtige Verpflichtungen, obwohl sie mir eigentlich wichtig sind.' },
+      { id: 'ex2', text: 'Ich beginne viele Dinge gleichzeitig, bringe aber nur wenige davon zu Ende.' },
+      { id: 'ex3', text: 'Ich kann Zeit schlecht einschätzen: Ich bin oft zu spät oder unterschätze, wie lange Dinge dauern. ("Zeitblindheit")' },
+      { id: 'ex4', text: 'Ich verfalle in tiefen Hyperfokus: Bei interessanten Themen vergesse ich Zeit, Hunger und meine Umgebung vollständig.' },
+      { id: 'ex5', text: 'Ich schiebe Aufgaben stark auf (Prokrastination), selbst wenn ich weiß, dass sie wichtig sind – manchmal bis zur Panik.' },
+    ]
+  },
+  {
+    id: 'impact',
+    title: 'Auswirkungen im Alltag',
+    badge: 'Funktionale Beeinträchtigung',
+    icon: '🌍',
+    desc: 'Wie stark beeinträchtigen die beschriebenen Schwierigkeiten die folgenden Lebensbereiche? (DSM-5 erfordert Beeinträchtigung in mind. 2 Bereichen)',
+    type: 'impact',
+    questions: [
+      { id: 'imp1', text: 'Beruf, Schule oder Studium (Leistung, Zuverlässigkeit, Karriere)' },
+      { id: 'imp2', text: 'Soziale Beziehungen (Familie, Freundschaften, Partnerschaft)' },
+      { id: 'imp3', text: 'Finanzen & Administration (Rechnungen, Bürokratie, Organisation)' },
+      { id: 'imp4', text: 'Allgemeines Wohlbefinden & Selbstwertgefühl' },
+    ]
+  },
+];
+
+const CONTEXT_QUESTIONS = [
+  {
+    id: 'age',
+    label: 'Wie alt sind Sie?',
+    options: [
+      { value: 'teen', label: 'Unter 18 Jahre' },
+      { value: 'young_adult', label: '18–29 Jahre' },
+      { value: 'adult', label: '30–49 Jahre' },
+      { value: 'older', label: '50 Jahre und älter' },
+    ]
+  },
+  {
+    id: 'childhood',
+    label: 'Waren diese Schwierigkeiten bereits in Ihrer Kindheit (vor dem 12. Lebensjahr) vorhanden?',
+    options: [
+      { value: 'yes', label: 'Ja, eindeutig' },
+      { value: 'probably', label: 'Wahrscheinlich schon' },
+      { value: 'unsure', label: 'Bin mir unsicher / kann mich nicht erinnern' },
+      { value: 'no', label: 'Nein, erst später aufgetreten' },
+    ]
+  },
+  {
+    id: 'settings',
+    label: 'In wie vielen Lebensbereichen erleben Sie diese Schwierigkeiten?',
+    options: [
+      { value: 'multiple', label: 'In mehreren Bereichen (z.B. Arbeit UND zuhause)' },
+      { value: 'one', label: 'Hauptsächlich in einem Bereich' },
+      { value: 'unsure', label: 'Bin mir unsicher' },
+    ]
+  },
+  {
+    id: 'known_diagnosis',
+    label: 'Haben Sie bereits eine ADHS-Diagnose oder befinden sich im Abklärungsprozess?',
+    options: [
+      { value: 'no', label: 'Nein, noch keine Diagnose' },
+      { value: 'process', label: 'Bin gerade im Abklärungsprozess' },
+      { value: 'yes', label: 'Ja, habe bereits eine Diagnose' },
+    ]
+  },
+];
+
+// ────────────────────────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────────────────────────
+
+let state = {
+  screen: 'welcome',   // welcome | context | section | results
+  sectionIndex: 0,     // 0-4 for SECTIONS
+  answers: {},         // { questionId: value }
+  context: {},         // { age, childhood, settings, known_diagnosis }
+};
+
+// ────────────────────────────────────────────────────────────────
+// SCORING
+// ────────────────────────────────────────────────────────────────
+
+function calcResults() {
+  const a = state.answers;
+  const ctx = state.context;
+
+  const iScores  = [1,2,3,4,5,6,7,8,9].map(n => a[`i${n}`] ?? 0);
+  const hScores  = [1,2,3,4,5,6,7,8,9].map(n => a[`h${n}`] ?? 0);
+  const eScores  = [1,2,3,4,5].map(n => a[`e${n}`] ?? 0);
+  const exScores = [1,2,3,4,5].map(n => a[`ex${n}`] ?? 0);
+  const impScores = [1,2,3,4].map(n => a[`imp${n}`] ?? 0);
+
+  const sum = arr => arr.reduce((a,b) => a+b, 0);
+  const pct = (arr, max) => sum(arr) / max * 100;
+
+  const iSum  = sum(iScores);
+  const hSum  = sum(hScores);
+  const eSum  = sum(eScores);
+  const exSum = sum(exScores);
+  const impSum = sum(impScores);
+
+  const iPct  = pct(iScores, 36);
+  const hPct  = pct(hScores, 36);
+  const ePct  = pct(eScores, 20);
+  const exPct = pct(exScores, 20);
+  const impPct = pct(impScores, 16);
+
+  // DSM-5: "often" = ≥2 (manchmal) counts as symptom
+  const iCount  = iScores.filter(s => s >= 2).length;
+  const hCount  = hScores.filter(s => s >= 2).length;
+
+  // Adult threshold is 5 (for 17+), child/teen is 6
+  const isMinor = ctx.age === 'teen';
+  const threshold = isMinor ? 6 : 5;
+
+  // Weighted overall score
+  let overall = (
+    iPct  * 0.28 +
+    hPct  * 0.22 +
+    ePct  * 0.15 +
+    exPct * 0.20 +
+    impPct * 0.15
+  );
+
+  // DSM-5 childhood onset adjustment
+  if (ctx.childhood === 'yes')      overall = Math.min(100, overall * 1.08);
+  if (ctx.childhood === 'probably') overall = Math.min(100, overall * 1.04);
+  if (ctx.childhood === 'no')       overall = Math.max(0,   overall * 0.82);
+
+  // Multi-setting adjustment
+  if (ctx.settings === 'multiple')  overall = Math.min(100, overall * 1.06);
+  if (ctx.settings === 'one')       overall = Math.max(0,   overall * 0.90);
+
+  overall = Math.round(overall * 10) / 10;
+
+  // ADHD type by DSM count
+  const iMeets = iCount >= threshold;
+  const hMeets = hCount >= threshold;
+  let adhdType = 'none';
+  if (iMeets && hMeets) adhdType = 'combined';
+  else if (iMeets)      adhdType = 'inattentive';
+  else if (hMeets)      adhdType = 'hyperactive';
+
+  // Severity
+  let severity;
+  if (overall < 18)      severity = 'minimal';
+  else if (overall < 36) severity = 'mild';
+  else if (overall < 55) severity = 'moderate';
+  else if (overall < 72) severity = 'high';
+  else                   severity = 'very_high';
+
+  // Impact areas with significant impairment
+  const impactedAreas = [
+    { id: 'imp1', label: 'Beruf / Schule / Studium', score: a['imp1'] ?? 0 },
+    { id: 'imp2', label: 'Soziale Beziehungen', score: a['imp2'] ?? 0 },
+    { id: 'imp3', label: 'Finanzen & Administration', score: a['imp3'] ?? 0 },
+    { id: 'imp4', label: 'Wohlbefinden & Selbstwert', score: a['imp4'] ?? 0 },
+  ].filter(x => x.score >= 2);
+
+  return {
+    iPct, hPct, ePct, exPct, impPct, overall,
+    iCount, hCount, threshold,
+    iMeets, hMeets, adhdType, severity,
+    impactedAreas, isMinor, ctx,
+    iScores, hScores,
+  };
+}
+
+// ────────────────────────────────────────────────────────────────
+// RENDER HELPERS
+// ────────────────────────────────────────────────────────────────
+
+function setProgress(sectionIdx) {
+  const total = SECTIONS.length;
+  const pct = Math.round((sectionIdx / total) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-label').textContent = `Abschnitt ${sectionIdx} von ${total}`;
+}
+
+function renderLikertQuestion(q, qNum, scaleOptions, prefix) {
+  const qId = q.id;
+  const answered = state.answers[qId] !== undefined;
+  return `
+    <div class="question-block" id="qblock-${qId}">
+      <div class="question-text">
+        <span class="question-num">${qNum}</span>${q.text}
+      </div>
+      <div class="likert-scale">
+        ${scaleOptions.map(opt => `
+          <label class="likert-option ${state.answers[qId] === opt.val ? 'selected' : ''}" data-val="${opt.val}">
+            <input type="radio" name="${qId}" value="${opt.val}" ${state.answers[qId] === opt.val ? 'checked' : ''}>
+            <span class="likert-btn">${opt.emoji}</span>
+            <span class="likert-label">${opt.label}</span>
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ────────────────────────────────────────────────────────────────
+// SCREENS
+// ────────────────────────────────────────────────────────────────
+
+function renderWelcome() {
+  document.getElementById('progress-area').style.display = 'none';
+  return `
+    <div class="card screen-fade">
+      <span class="card-icon">🧩</span>
+      <h1 class="card-title">ADHS Selbsteinschätzung</h1>
+      <p class="card-desc">
+        Dieser umfassende Selbsttest hilft Ihnen einzuschätzen, wie wahrscheinlich
+        eine <strong>Aufmerksamkeitsdefizit-Hyperaktivitätsstörung (ADHS/ADS)</strong> bei Ihnen vorliegen könnte.
+        Das Tool arbeitet vollständig offline – Ihre Daten verlassen nie dieses Gerät.
+      </p>
+
+      <ul class="feature-list">
+        <li>
+          <span class="feature-icon">📋</span>
+          <span><strong>DSM-5 Kriterien</strong> – Offizielles Diagnosesystem für ADHS (18 Kernsymptome)</span>
+        </li>
+        <li>
+          <span class="feature-icon">🌍</span>
+          <span><strong>WHO ASRS v1.1</strong> – Klinisch validierter Erwachsenen-Screener</span>
+        </li>
+        <li>
+          <span class="feature-icon">💭</span>
+          <span><strong>Emotionale Regulation & Exekutivfunktionen</strong> – Häufig übersehene ADHS-Aspekte</span>
+        </li>
+        <li>
+          <span class="feature-icon">📊</span>
+          <span><strong>~32 Fragen</strong> in 5 Abschnitten · Dauer: 8–12 Minuten</span>
+        </li>
+        <li>
+          <span class="feature-icon">🔒</span>
+          <span><strong>100% offline</strong> – Keine Daten werden übertragen oder gespeichert</span>
+        </li>
+      </ul>
+
+      <div class="disclaimer">
+        <strong>⚠️ Wichtiger Hinweis – Kein Ersatz für ärztliche Diagnose</strong>
+        Dieses Tool dient ausschließlich zur persönlichen Selbsteinschätzung und Orientierung.
+        Es ersetzt <em>keine</em> professionelle psychiatrische oder psychologische Diagnostik.
+        Nur ausgebildete Fachkräfte (Psychiater, Psychologen, Neurologen) können eine
+        offizielle ADHS-Diagnose stellen. Bei konkretem Verdacht wenden Sie sich bitte
+        an Ihren Arzt oder eine Fachklinik.
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary btn-lg" onclick="startContext()">
+          Jetzt starten <span>→</span>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderContext() {
+  document.getElementById('progress-area').style.display = 'none';
+  return `
+    <div class="card screen-fade">
+      <div class="section-header">
+        <span class="section-icon">👤</span>
+        <div>
+          <div class="section-badge">Vorab-Informationen</div>
+          <div class="section-title">Allgemeine Fragen</div>
+          <div class="section-desc">Diese Angaben fließen in die Auswertung ein und helfen, das Ergebnis präziser zu berechnen.</div>
+        </div>
+      </div>
+
+      ${CONTEXT_QUESTIONS.map((q, qi) => `
+        <div class="context-question">
+          <label>${qi + 1}. ${q.label}</label>
+          <div class="context-options">
+            ${q.options.map(opt => `
+              <label class="context-option ${state.context[q.id] === opt.value ? 'selected' : ''}"
+                     onclick="setContext('${q.id}', '${opt.value}')">
+                <input type="radio" name="${q.id}" value="${opt.value}">
+                <div class="context-radio"></div>
+                <span class="context-option-label">${opt.label}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+
+      <div class="validation-msg" id="ctx-validation">
+        Bitte beantworten Sie alle Fragen, bevor Sie fortfahren.
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goWelcome()">← Zurück</button>
+        <div class="spacer"></div>
+        <button class="btn btn-primary" onclick="startSections()">Weiter →</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderSection(idx) {
+  const sec = SECTIONS[idx];
+  const scaleOptions = sec.type === 'impact' ? IMPACT_LABELS : LIKERT;
+  document.getElementById('progress-area').style.display = 'block';
+  setProgress(idx + 1);
+
+  let qNum = 1;
+  return `
+    <div class="card screen-fade">
+      <div class="section-header">
+        <span class="section-icon">${sec.icon}</span>
+        <div>
+          <div class="section-badge">${sec.badge}</div>
+          <div class="section-title">${sec.title}</div>
+          <div class="section-desc">${sec.desc}</div>
+        </div>
+      </div>
+
+      ${sec.questions.map(q => renderLikertQuestion(q, qNum++, scaleOptions)).join('')}
+
+      <div class="validation-msg" id="sec-validation">
+        Bitte beantworten Sie alle Fragen in diesem Abschnitt, bevor Sie fortfahren.
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="prevSection()">← Zurück</button>
+        <div class="spacer"></div>
+        <button class="btn btn-primary" onclick="nextSection()">
+          ${idx < SECTIONS.length - 1 ? 'Weiter →' : 'Auswertung anzeigen ✓'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderResults() {
+  const r = calcResults();
+  document.getElementById('progress-area').style.display = 'none';
+
+  const sevInfo = {
+    minimal:   { label: 'Keine / minimale Anzeichen', emoji: '😌', cls: 'sev-minimal',   color: '#00B894', desc: 'Die Antworten zeigen keine oder sehr geringe Hinweise auf ADHS. Die beschriebenen Schwierigkeiten sind wahrscheinlich auf andere Ursachen zurückzuführen.' },
+    mild:      { label: 'Leichte Anzeichen',          emoji: '🙂', cls: 'sev-mild',     color: '#00CEC9', desc: 'Es gibt leichte Hinweise auf einige ADHS-typische Muster. Diese könnten auch durch Stress, Schlafmangel oder andere Faktoren erklärbar sein.' },
+    moderate:  { label: 'Moderate Anzeichen',         emoji: '😐', cls: 'sev-moderate', color: '#FDCB6E', desc: 'Die Antworten zeigen merkliche ADHS-typische Muster in mehreren Bereichen. Eine professionelle Abklärung könnte hilfreich sein.' },
+    high:      { label: 'Starke Anzeichen',           emoji: '😟', cls: 'sev-high',     color: '#E17055', desc: 'Es liegen deutliche Anzeichen vor, die auf eine ADHS hindeuten könnten. Eine psychiatrische oder psychologische Diagnostik wird empfohlen.' },
+    very_high: { label: 'Sehr starke Anzeichen',      emoji: '😰', cls: 'sev-very-high',color: '#D63031', desc: 'Die Antworten zeigen sehr starke und konsistente ADHS-Muster in mehreren Lebensbereichen. Eine fachärztliche Abklärung ist dringend empfehlenswert.' },
+  };
+
+  const typeInfo = {
+    combined:    { label: 'ADHS – Kombinierter Typ',                    emoji: '⚡🧠', cls: 'combined',    desc: 'Sowohl Unaufmerksamkeit als auch Hyperaktivität/Impulsivität erreichen den diagnostischen Schwellenwert.' },
+    inattentive: { label: 'ADS – Vorwiegend unaufmerksamer Typ',         emoji: '🧠',   cls: 'inattentive', desc: 'Vor allem Unaufmerksamkeit und Konzentrationsprobleme überwiegen. Hyperaktivität ist weniger ausgeprägt.' },
+    hyperactive: { label: 'ADHS – Vorwiegend hyperaktiv-impulsiver Typ', emoji: '⚡',   cls: 'hyperactive', desc: 'Vor allem Hyperaktivität und Impulsivität überwiegen. Unaufmerksamkeit ist weniger ausgeprägt.' },
+    none:        { label: 'Kein klares ADHS-Muster erkennbar',           emoji: '💙',   cls: 'none',        desc: 'Die Symptomanzahl erreicht den diagnostischen Schwellenwert nach DSM-5 nicht.' },
+  };
+
+  const si = sevInfo[r.severity];
+  const ti = typeInfo[r.adhdType];
+
+  // Gauge SVG
+  const angle = (r.overall / 100) * 180;
+  const rad = (angle - 180) * Math.PI / 180;
+  const cx = 110, cy = 110, radius = 88;
+  const x = cx + radius * Math.cos(rad);
+  const y = cy + radius * Math.sin(rad);
+  const largeArc = angle > 180 ? 1 : 0;
+
+  // Color based on severity
+  const gaugeColor = si.color;
+
+  const findings = [];
+  if (r.iCount >= r.threshold) findings.push(`✓ Unaufmerksamkeit: <strong>${r.iCount}/9</strong> Symptome erfüllen das DSM-5 Kriterium (Schwellenwert: ${r.threshold})`);
+  if (r.hCount >= r.threshold) findings.push(`✓ Hyperaktivität/Impulsivität: <strong>${r.hCount}/9</strong> Symptome erfüllen das DSM-5 Kriterium (Schwellenwert: ${r.threshold})`);
+  if (r.ctx.childhood === 'yes' || r.ctx.childhood === 'probably') findings.push('✓ Symptome bereits in der Kindheit vorhanden (wichtiges DSM-5 Kriterium)');
+  if (r.ctx.settings === 'multiple') findings.push('✓ Schwierigkeiten in mehreren Lebensbereichen (wichtiges DSM-5 Kriterium)');
+  if (r.impactedAreas.length >= 2) findings.push(`✓ Beeinträchtigung in ${r.impactedAreas.length} Lebensbereichen: ${r.impactedAreas.map(x=>x.label).join(', ')}`);
+  if (r.ePct > 55) findings.push(`⚠ Ausgeprägte emotionale Dysregulation (${Math.round(r.ePct)}%) – häufig bei ADHS`);
+  if (r.exPct > 55) findings.push(`⚠ Deutliche Schwierigkeiten mit Exekutivfunktionen (${Math.round(r.exPct)}%)`);
+
+  const barColor = (pct) => {
+    if (pct < 30) return '#00B894';
+    if (pct < 50) return '#FDCB6E';
+    if (pct < 70) return '#E17055';
+    return '#D63031';
+  };
+
+  return `
+    <div class="card screen-fade result-hero">
+      <span class="result-emoji">${si.emoji}</span>
+      <div class="result-label">Gesamtergebnis</div>
+      <h2 class="result-title ${si.cls}">${si.label}</h2>
+      <p class="result-desc">${si.desc}</p>
+
+      <!-- Gauge -->
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 220 130">
+          <!-- Background arc -->
+          <path d="M 22 110 A 88 88 0 0 1 198 110" fill="none" stroke="#E9ECEF" stroke-width="16" stroke-linecap="round"/>
+          <!-- Colored arc -->
+          ${r.overall > 1 ? `<path d="M 22 110 A 88 88 0 ${largeArc} 1 ${x.toFixed(1)} ${y.toFixed(1)}"
+                fill="none" stroke="${gaugeColor}" stroke-width="16" stroke-linecap="round"/>` : ''}
+          <!-- Value text -->
+          <text x="110" y="98" text-anchor="middle" class="gauge-value" font-size="32" font-weight="900" fill="${gaugeColor}">${Math.round(r.overall)}</text>
+          <text x="110" y="116" text-anchor="middle" class="gauge-unit" font-size="13" fill="#868E96">von 100 Punkten</text>
+        </svg>
+      </div>
+
+      <!-- ADHD Type -->
+      <div>
+        <div style="font-size:0.82rem;color:var(--gray-600);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Möglicher Typ</div>
+        <span class="type-badge ${ti.cls}">${ti.emoji} ${ti.label}</span>
+        <p style="font-size:0.85rem;color:var(--gray-600);margin-top:8px;font-style:italic;">${ti.desc}</p>
+      </div>
+    </div>
+
+    <!-- DSM-5 Symptom Count -->
+    <div class="card screen-fade">
+      <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:16px;">📊 DSM-5 Symptomzählung</h3>
+      <p style="font-size:0.85rem;color:var(--gray-600);margin-bottom:16px;">
+        Nach DSM-5 müssen <strong>mind. ${r.threshold} Symptome</strong> (Erwachsene ≥17) je Bereich „manchmal" oder häufiger auftreten.
+      </p>
+      <div class="dsm-count-row">
+        <div class="dsm-pill">
+          <div class="dp-num ${r.iCount >= r.threshold ? 'meets' : r.iCount >= r.threshold - 2 ? 'almost' : 'low'}">${r.iCount}<span class="dp-max">/9</span></div>
+          <div class="dp-label">Unaufmerksamkeit<br><small>(Schwellenwert: ${r.threshold})</small></div>
+        </div>
+        <div class="dsm-pill">
+          <div class="dp-num ${r.hCount >= r.threshold ? 'meets' : r.hCount >= r.threshold - 2 ? 'almost' : 'low'}">${r.hCount}<span class="dp-max">/9</span></div>
+          <div class="dp-label">Hyperaktivität /<br>Impulsivität<br><small>(Schwellenwert: ${r.threshold})</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="card screen-fade">
+      <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:16px;">📈 Aufschlüsselung nach Bereichen</h3>
+      <div class="breakdown-grid">
+        <div class="breakdown-item">
+          <div class="bi-label">🧠 Unaufmerksamkeit</div>
+          <div class="bi-bar-bg"><div class="bi-bar-fill" style="width:${r.iPct}%;background:${barColor(r.iPct)}"></div></div>
+          <div class="bi-value">${Math.round(r.iPct)}%</div>
+          <div class="bi-count">${r.iCount} von 9 Symptomen</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="bi-label">⚡ Hyperaktivität & Impuls</div>
+          <div class="bi-bar-bg"><div class="bi-bar-fill" style="width:${r.hPct}%;background:${barColor(r.hPct)}"></div></div>
+          <div class="bi-value">${Math.round(r.hPct)}%</div>
+          <div class="bi-count">${r.hCount} von 9 Symptomen</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="bi-label">💭 Emotionale Regulation</div>
+          <div class="bi-bar-bg"><div class="bi-bar-fill" style="width:${r.ePct}%;background:${barColor(r.ePct)}"></div></div>
+          <div class="bi-value">${Math.round(r.ePct)}%</div>
+          <div class="bi-count">5 Fragen</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="bi-label">🗂️ Exekutivfunktionen</div>
+          <div class="bi-bar-bg"><div class="bi-bar-fill" style="width:${r.exPct}%;background:${barColor(r.exPct)}"></div></div>
+          <div class="bi-value">${Math.round(r.exPct)}%</div>
+          <div class="bi-count">5 Fragen</div>
+        </div>
+        <div class="breakdown-item">
+          <div class="bi-label">🌍 Alltagsbeeinträchtigung</div>
+          <div class="bi-bar-bg"><div class="bi-bar-fill" style="width:${r.impPct}%;background:${barColor(r.impPct)}"></div></div>
+          <div class="bi-value">${Math.round(r.impPct)}%</div>
+          <div class="bi-count">${r.impactedAreas.length} Bereiche mäßig/stark betroffen</div>
+        </div>
+      </div>
+    </div>
+
+    ${findings.length > 0 ? `
+    <!-- Key Findings -->
+    <div class="card screen-fade">
+      <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:16px;">🔍 Wichtige Befunde</h3>
+      <ul class="findings-list">
+        ${findings.map(f => `<li><span class="finding-icon">•</span><span>${f}</span></li>`).join('')}
+      </ul>
+    </div>` : ''}
+
+    <!-- Interpretation Guide -->
+    <div class="card screen-fade">
+      <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:16px;">📖 Einordnung des Ergebnisses</h3>
+      <div style="font-size:0.88rem;color:var(--gray-700);line-height:1.7;">
+        <p style="margin-bottom:12px;">
+          Dieses Tool berechnet einen <strong>Wahrscheinlichkeitswert</strong> basierend auf Ihren Antworten
+          und den klinischen Kriterien nach DSM-5. Ein hoher Wert bedeutet, dass Ihre Selbstangaben
+          stark dem typischen ADHS-Muster entsprechen – <em>nicht</em>, dass eine Diagnose sicher ist.
+        </p>
+        <p style="margin-bottom:12px;">
+          Für eine offizielle Diagnose sind nötig: strukturierte klinische Interviews, Fremdanamnese,
+          neuropsychologische Tests und der Ausschluss anderer Ursachen (z.B. Depression, Angst, Trauma, Schlafstörungen).
+        </p>
+        ${r.overall >= 45 ? `<p style="color:var(--primary);font-weight:600;">
+          → Bei einem Ergebnis von ${Math.round(r.overall)} Punkten empfehlen wir, das Gespräch
+          mit einem Psychiater, Psychologen oder Ihrem Hausarzt zu suchen. Schildern Sie Ihre
+          Erfahrungen offen – dieses Ergebnis kann als Gesprächseinstieg dienen.
+        </p>` : ''}
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      <strong>⚠️ Wichtiger rechtlicher Hinweis</strong>
+      Dieses Selbsttest-Tool wurde sorgfältig auf Basis wissenschaftlicher Kriterien erstellt,
+      stellt jedoch <strong>keine medizinische Diagnose</strong> dar und ersetzt diese nicht.
+      Die Ergebnisse sind rein informativ. Bei gesundheitlichen Fragen oder Bedenken wenden Sie
+      sich bitte an eine qualifizierte Fachperson. Das Tool basiert auf DSM-5 und WHO ASRS v1.1,
+      ist aber kein zertifiziertes Medizinprodukt.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goWelcome()">⟳ Neu starten</button>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Drucken / Speichern</button>
+    </div>
+  `;
+}
+
+// ────────────────────────────────────────────────────────────────
+// NAVIGATION
+// ────────────────────────────────────────────────────────────────
+
+function render() {
+  const el = document.getElementById('main-content');
+  switch(state.screen) {
+    case 'welcome': el.innerHTML = renderWelcome(); break;
+    case 'context': el.innerHTML = renderContext(); attachContextListeners(); break;
+    case 'section': el.innerHTML = renderSection(state.sectionIndex); attachSectionListeners(); break;
+    case 'results': el.innerHTML = renderResults(); break;
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goWelcome() {
+  state.screen = 'welcome';
+  render();
+}
+
+function startContext() {
+  state.screen = 'context';
+  render();
+}
+
+function setContext(id, value) {
+  state.context[id] = value;
+  render();
+}
+
+function allContextAnswered() {
+  return CONTEXT_QUESTIONS.every(q => state.context[q.id] !== undefined);
+}
+
+function startSections() {
+  if (!allContextAnswered()) {
+    document.getElementById('ctx-validation').classList.add('visible');
+    return;
+  }
+  state.screen = 'section';
+  state.sectionIndex = 0;
+  render();
+}
+
+function allSectionAnswered() {
+  const sec = SECTIONS[state.sectionIndex];
+  return sec.questions.every(q => state.answers[q.id] !== undefined);
+}
+
+function nextSection() {
+  if (!allSectionAnswered()) {
+    document.getElementById('sec-validation').classList.add('visible');
+    // Highlight unanswered
+    const sec = SECTIONS[state.sectionIndex];
+    sec.questions.forEach(q => {
+      const block = document.getElementById(`qblock-${q.id}`);
+      if (state.answers[q.id] === undefined && block) {
+        block.classList.add('unanswered');
+        block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+    return;
+  }
+  if (state.sectionIndex < SECTIONS.length - 1) {
+    state.sectionIndex++;
+    state.screen = 'section';
+  } else {
+    state.screen = 'results';
+  }
+  render();
+}
+
+function prevSection() {
+  if (state.sectionIndex > 0) {
+    state.sectionIndex--;
+    state.screen = 'section';
+    render();
+  } else {
+    state.screen = 'context';
+    render();
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// EVENT LISTENERS
+// ────────────────────────────────────────────────────────────────
+
+function attachContextListeners() {
+  // Already handled via inline onclick
+}
+
+function attachSectionListeners() {
+  const sec = SECTIONS[state.sectionIndex];
+  sec.questions.forEach(q => {
+    const block = document.getElementById(`qblock-${q.id}`);
+    if (!block) return;
+    block.querySelectorAll('.likert-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const val = parseInt(opt.dataset.val);
+        state.answers[q.id] = val;
+        // Update UI
+        block.querySelectorAll('.likert-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        block.classList.remove('unanswered');
+        // Hide validation msg if all answered
+        if (allSectionAnswered()) {
+          const msg = document.getElementById('sec-validation');
+          if (msg) msg.classList.remove('visible');
+        }
+      });
+    });
+  });
+}
+
+// ────────────────────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
