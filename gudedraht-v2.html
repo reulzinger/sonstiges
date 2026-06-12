@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gude Draht – Event-Cockpit v2</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ── Dot-Grid Hintergrund ── */
+        .dot-bg {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+
+        /* ── Emoji-Füll-Animation ── */
+        @keyframes fill-up {
+            from { height: 0% }
+            to   { height: 100% }
+        }
+        .fill-anim { animation: fill-up 2.8s cubic-bezier(.4,0,.2,1) forwards; }
+
+        /* ── Hub-Pulse (Ergebnisse-Button) ── */
+        @keyframes cta-pulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,.4), 0 0 0 0 rgba(245,158,11,.2) }
+            50%      { box-shadow: 0 0 0 12px rgba(245,158,11,.15), 0 0 0 28px rgba(245,158,11,.05) }
+        }
+        .cta-pulse { animation: cta-pulse 2s ease-in-out infinite; }
+
+        /* ── Swipe Card Drag ── */
+        .swipe-card {
+            touch-action: none;
+            user-select: none;
+            will-change: transform;
+            transition: transform .08s linear;
+        }
+        .swipe-card.snap-back {
+            transition: transform .4s cubic-bezier(.34,1.56,.64,1) !important;
+        }
+        .swipe-card.fly-right {
+            transition: transform .35s ease-in, opacity .35s ease-in !important;
+            transform: translateX(110vw) rotate(20deg) !important;
+            opacity: 0 !important;
+        }
+        .swipe-card.fly-left {
+            transition: transform .35s ease-in, opacity .35s ease-in !important;
+            transform: translateX(-110vw) rotate(-20deg) !important;
+            opacity: 0 !important;
+        }
+
+        /* ── Overlay Labels auf Karten ── */
+        .label-right, .label-left { opacity: 0; transition: opacity .15s; }
+        .label-right { transform: rotate(-12deg); }
+        .label-left  { transform: rotate(12deg); }
+
+        /* ── Karten-Stack (hinten liegende Karten) ── */
+        .card-stack-2 { transform: scale(.96) translateY(12px); z-index: 1; }
+        .card-stack-3 { transform: scale(.92) translateY(22px); z-index: 0; }
+
+        /* ── Progress Dots ── */
+        .dot-active   { background: #f59e0b; transform: scale(1.25); }
+        .dot-done     { background: #10b981; }
+        .dot-inactive { background: #e2e8f0; }
+
+        /* ── Floating Cards ── */
+        @keyframes fl1{0%,100%{transform:translateY(0)rotate(.2deg)}50%{transform:translateY(-6px)rotate(-.2deg)}}
+        @keyframes fl2{0%,100%{transform:translateY(-3px)rotate(-.3deg)}50%{transform:translateY(5px)rotate(.2deg)}}
+        .fl1{animation:fl1 5.5s ease-in-out infinite}
+        .fl2{animation:fl2 6.2s ease-in-out infinite}
+
+        /* ── Kanban ── */
+        .kanban-col { min-width: 240px; max-width: 260px; flex-shrink: 0; }
+
+        /* ── Countdown-Segment ── */
+        .timeline-step { flex: 1; position: relative; }
+        .timeline-step::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -1px;
+            width: 2px;
+            height: 16px;
+            transform: translateY(-50%);
+            background: #e2e8f0;
+        }
+        .timeline-step:last-child::after { display: none; }
+
+        /* ── Star fill ── */
+        .star-fill { color: #f59e0b; }
+
+        /* ── Smooth transitions ── */
+        * { -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+    </style>
+</head>
+<body class="dot-bg text-slate-800 font-sans antialiased min-h-screen">
+
+<!-- ══════════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════════ -->
+<header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-md">
+    <div class="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center shadow-md shrink-0">
+                <i class="fa-solid fa-hands-holding-child text-white text-base"></i>
+            </div>
+            <div>
+                <p class="font-bold text-sm leading-none text-slate-900">Gude Draht</p>
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Event-Cockpit</p>
+            </div>
+        </div>
+        <button id="btn-reset" onclick="resetAll()" class="hidden text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer">
+            <i class="fa-solid fa-arrow-rotate-left mr-1"></i>Reset
+        </button>
+    </div>
+</header>
+
+<main class="max-w-lg mx-auto px-4 pb-10">
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 1 – INPUT
+══════════════════════════════════════════════ -->
+<div id="s-input" class="mt-6 bg-white border border-slate-200 rounded-3xl p-5 shadow-xl">
+    <div class="text-center mb-5">
+        <div class="text-4xl mb-2">🎉</div>
+        <h1 class="text-xl font-bold text-slate-900">Dein Event, dein Netzwerk.</h1>
+        <p class="text-xs text-slate-400 mt-1">Gude! Kurz ausfüllen — wir suchen dir die besten Anbieter raus.</p>
+    </div>
+
+    <div class="space-y-3.5">
+        <!-- Eventname -->
+        <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Eventname</label>
+            <input type="text" id="i-name" placeholder="z.B. Hochzeit Müller-Schmidt"
+                   class="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-amber-500 transition-colors">
+        </div>
+
+        <!-- Event-Typ -->
+        <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Was steht an?</label>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="setType('Hochzeit',this,'fa-heart')"        class="type-btn p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"><i class="fa-solid fa-heart text-slate-300 text-xs"></i>Hochzeit</button>
+                <button onclick="setType('Firmenfeier',this,'fa-briefcase')" class="type-btn p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"><i class="fa-solid fa-briefcase text-slate-300 text-xs"></i>Firmenfeier</button>
+                <button onclick="setType('Geburtstag',this,'fa-cake-candles')" class="type-btn p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"><i class="fa-solid fa-cake-candles text-slate-300 text-xs"></i>Geburtstag</button>
+                <button onclick="setType('Vereinsfest',this,'fa-masks-theater')" class="type-btn p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"><i class="fa-solid fa-masks-theater text-slate-300 text-xs"></i>Vereinsfest</button>
+            </div>
+        </div>
+
+        <!-- Datum & Ort -->
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Wann?</label>
+                <input type="date" id="i-date" class="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-amber-500 transition-colors">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Wo?</label>
+                <input type="text" id="i-loc" placeholder="z.B. Griesheim" class="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-amber-500 transition-colors">
+            </div>
+        </div>
+
+        <!-- Gäste -->
+        <div>
+            <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                <span>Gästeanzahl</span>
+                <span id="guest-lbl" class="text-orange-600 font-mono">120 Personen</span>
+            </div>
+            <input type="range" id="i-guests" min="20" max="400" value="120"
+                   oninput="document.getElementById('guest-lbl').textContent=this.value+' Personen'"
+                   class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+        </div>
+
+        <!-- Budget -->
+        <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Gesamtbudget (€)</label>
+            <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
+                <input type="number" id="i-budget" placeholder="z.B. 8000" min="500" step="500"
+                       class="w-full pl-7 pr-3 p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:border-amber-500 transition-colors">
+            </div>
+        </div>
+
+        <button onclick="startSearch()"
+                class="w-full bg-gradient-to-r from-slate-900 to-slate-800 text-white font-bold py-3.5 rounded-xl shadow-md hover:scale-[1.01] active:scale-[.99] transition-all cursor-pointer text-sm mt-1">
+            Passende Anbieter suchen <i class="fa-solid fa-magnifying-glass ml-1 text-amber-400"></i>
+        </button>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 2 – LOADING
+══════════════════════════════════════════════ -->
+<div id="s-loading" class="hidden mt-10 flex flex-col items-center text-center px-4">
+
+    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Wir durchsuchen gerade dein Netzwerk …</p>
+
+    <!-- Emoji-Container mit Bottom-to-Top Fill -->
+    <div id="emoji-wrap" class="relative w-44 h-44 rounded-full overflow-hidden bg-slate-100 shadow-2xl border-4 border-white mx-auto cursor-pointer select-none" onclick="onEmojiClick()">
+        <!-- Farbiger Fill von unten -->
+        <div id="emoji-fill" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-amber-500 via-orange-400 to-yellow-300" style="height:0%"></div>
+        <!-- Emoji darüber -->
+        <div class="absolute inset-0 flex items-center justify-center text-7xl z-10 select-none pointer-events-none">🎉</div>
+        <!-- "Jetzt ansehen" Overlay – erscheint nach 100% -->
+        <div id="cta-overlay" class="absolute inset-0 flex items-center justify-center z-20 opacity-0 transition-opacity duration-500 pointer-events-none">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg">
+                <p class="text-xs font-bold text-slate-900 leading-tight">Ergebnisse<br>ansehen</p>
+                <i class="fa-solid fa-arrow-right text-amber-500 mt-1 block"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prozent-Zähler -->
+    <p class="mt-5 text-4xl font-black font-mono text-slate-900 tabular-nums"><span id="pct-num">0</span><span class="text-amber-500">%</span></p>
+    <p id="loading-label" class="text-xs text-slate-400 mt-1 h-4 transition-all">Standort wird analysiert …</p>
+
+    <!-- Animierte Dots -->
+    <div class="flex gap-1.5 mt-6">
+        <div class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce" style="animation-delay:0s"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style="animation-delay:.15s"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-amber-300 animate-bounce" style="animation-delay:.3s"></div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 3 – SWIPE CARDS
+══════════════════════════════════════════════ -->
+<div id="s-swipe" class="hidden mt-6">
+
+    <!-- Progress Dots -->
+    <div class="flex items-center justify-center gap-2 mb-5">
+        <div id="dot-0" class="w-2 h-2 rounded-full dot-active transition-all"></div>
+        <div id="dot-1" class="w-2 h-2 rounded-full dot-inactive transition-all"></div>
+        <div id="dot-2" class="w-2 h-2 rounded-full dot-inactive transition-all"></div>
+        <div id="dot-3" class="w-2 h-2 rounded-full dot-inactive transition-all"></div>
+        <div id="dot-4" class="w-2 h-2 rounded-full dot-inactive transition-all"></div>
+        <div id="dot-5" class="w-2 h-2 rounded-full dot-inactive transition-all"></div>
+    </div>
+
+    <!-- Karten-Stack -->
+    <div class="relative h-[480px] select-none">
+
+        <!-- Schatten-Karten hinter der aktiven -->
+        <div id="stack-bg2" class="absolute inset-x-4 inset-y-0 bg-white border border-slate-200 rounded-3xl card-stack-3 shadow-sm"></div>
+        <div id="stack-bg1" class="absolute inset-x-2 inset-y-0 bg-white border border-slate-200 rounded-3xl card-stack-2 shadow-md"></div>
+
+        <!-- Aktive Swipe-Karte -->
+        <div id="active-card" class="absolute inset-0 bg-white border border-slate-200 rounded-3xl shadow-xl z-10 swipe-card overflow-hidden">
+
+            <!-- Right-Overlay (Anfragen) -->
+            <div id="lbl-right" class="label-right absolute top-8 left-6 z-20 bg-emerald-500 text-white font-black text-lg px-4 py-1.5 rounded-xl border-2 border-emerald-600 rotate-[-12deg]">
+                ANFRAGEN ✓
+            </div>
+            <!-- Left-Overlay (Skip) -->
+            <div id="lbl-left" class="label-left absolute top-8 right-6 z-20 bg-slate-400 text-white font-black text-lg px-4 py-1.5 rounded-xl border-2 border-slate-500 rotate-[12deg]">
+                SKIP ✕
+            </div>
+
+            <!-- Karten-Inhalt -->
+            <div class="p-6 h-full flex flex-col">
+                <!-- Kategorie-Header -->
+                <div class="flex items-center gap-3 mb-4">
+                    <div id="card-icon-wrap" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner shrink-0">
+                        <i id="card-icon" class="fa-solid fa-utensils text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kategorie</p>
+                        <h2 id="card-title" class="text-xl font-black text-slate-900 leading-tight">Catering & Grill</h2>
+                    </div>
+                    <span id="card-counter" class="ml-auto text-xs font-bold text-slate-400">1 / 6</span>
+                </div>
+
+                <!-- Standort-Pill -->
+                <div class="flex items-center gap-1.5 mb-4">
+                    <i class="fa-solid fa-location-dot text-amber-500 text-xs"></i>
+                    <span id="card-location" class="text-xs text-slate-500 font-medium">Top-Anbieter in Griesheim & Umgebung</span>
+                </div>
+
+                <!-- Anbieter-Liste -->
+                <div class="space-y-2.5 flex-1" id="card-providers">
+                    <!-- wird per JS befüllt -->
+                </div>
+
+                <!-- Swipe-Hint -->
+                <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+                    <button onclick="swipeLeft()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
+                        <i class="fa-solid fa-xmark"></i> Überspringen
+                    </button>
+                    <div class="text-center">
+                        <p class="text-[8px] text-slate-300 font-bold uppercase tracking-wider">Oder</p>
+                        <p class="text-[8px] text-slate-300 font-bold uppercase tracking-wider">Wischen</p>
+                    </div>
+                    <button onclick="swipeRight()" class="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors cursor-pointer">
+                        Alle anfragen <i class="fa-solid fa-check"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zähler angefragt -->
+    <div class="mt-4 text-center">
+        <span id="swipe-summary" class="text-xs text-slate-400"></span>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 4 – PLANUNGS-COCKPIT
+══════════════════════════════════════════════ -->
+<div id="s-cockpit" class="hidden mt-5 space-y-4">
+
+    <!-- Event-Header-Card -->
+    <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-5 text-white shadow-xl">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aktives Event</p>
+                <h2 class="text-lg font-black mt-0.5" id="cockpit-name">Mein Event</h2>
+                <div class="flex items-center gap-3 mt-2 text-xs text-slate-400">
+                    <span><i class="fa-solid fa-location-dot text-amber-400 mr-1"></i><span id="cockpit-loc">—</span></span>
+                    <span><i class="fa-solid fa-users text-amber-400 mr-1"></i><span id="cockpit-guests">—</span></span>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Budget</p>
+                <p class="text-xl font-black font-mono text-amber-400" id="cockpit-budget">—</p>
+                <p class="text-[9px] text-emerald-400 font-bold mt-0.5" id="cockpit-budget-used">0 € vergeben</p>
+            </div>
+        </div>
+
+        <!-- Countdown-Leiste -->
+        <div class="mt-4 bg-white/10 rounded-2xl p-3">
+            <div class="flex items-center justify-between mb-1.5">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Tage bis zum Event</p>
+                <p class="text-xs font-black text-amber-400"><span id="days-left">—</span> Tage</p>
+            </div>
+            <div class="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div id="days-bar" class="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full transition-all duration-1000" style="width:60%"></div>
+            </div>
+            <!-- Meilensteine -->
+            <div class="flex mt-3 text-center">
+                <div class="timeline-step">
+                    <p class="text-[8px] font-bold text-emerald-400">Jetzt</p>
+                    <p class="text-[7px] text-slate-400 mt-0.5">Anfragen</p>
+                </div>
+                <div class="timeline-step">
+                    <p class="text-[8px] font-bold text-amber-400">−8 Wo</p>
+                    <p class="text-[7px] text-slate-400 mt-0.5">Verträge</p>
+                </div>
+                <div class="timeline-step">
+                    <p class="text-[8px] font-bold text-amber-400">−4 Wo</p>
+                    <p class="text-[7px] text-slate-400 mt-0.5">Anzahl.</p>
+                </div>
+                <div class="timeline-step">
+                    <p class="text-[8px] font-bold text-slate-400">−1 Wo</p>
+                    <p class="text-[7px] text-slate-400 mt-0.5">Details</p>
+                </div>
+                <div class="timeline-step">
+                    <p class="text-[8px] font-bold text-slate-400">🎉</p>
+                    <p class="text-[7px] text-slate-400 mt-0.5">Event</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget-Schnellansicht -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-bold text-slate-600 uppercase tracking-wider">Budget-Überblick</p>
+            <p class="text-[10px] text-slate-400 font-mono" id="budget-fraction">0 / 0 €</p>
+        </div>
+        <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div id="budget-prog" class="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full transition-all duration-700" style="width:0%"></div>
+        </div>
+        <p class="text-[9px] text-slate-400 mt-1 text-right" id="budget-pct-lbl">0 % vergeben</p>
+    </div>
+
+    <!-- Kanban Pipeline -->
+    <div>
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-sm text-slate-900">Anbieter-Pipeline</h3>
+            <span class="text-[10px] text-slate-400">← Horizontal scrollen</span>
+        </div>
+        <div class="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4">
+
+            <!-- Spalte 1: Angefragt -->
+            <div class="kanban-col shrink-0">
+                <div class="flex items-center gap-1.5 mb-2.5">
+                    <div class="w-2 h-2 rounded-full bg-sky-400"></div>
+                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-500">Angefragt</p>
+                    <span id="k-count-1" class="ml-auto text-[9px] bg-sky-100 text-sky-700 font-bold px-1.5 py-0.5 rounded-full">0</span>
+                </div>
+                <div id="k-col-1" class="space-y-2.5 min-h-[80px]">
+                    <div class="text-center py-6 border border-dashed border-slate-200 rounded-2xl text-[10px] text-slate-300">
+                        Noch leer
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spalte 2: Angebot erhalten -->
+            <div class="kanban-col shrink-0">
+                <div class="flex items-center gap-1.5 mb-2.5">
+                    <div class="w-2 h-2 rounded-full bg-amber-400"></div>
+                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-500">Angebot</p>
+                    <span id="k-count-2" class="ml-auto text-[9px] bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded-full">0</span>
+                </div>
+                <div id="k-col-2" class="space-y-2.5 min-h-[80px]">
+                    <div class="text-center py-6 border border-dashed border-slate-200 rounded-2xl text-[10px] text-slate-300">
+                        Noch leer
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spalte 3: Gebucht -->
+            <div class="kanban-col shrink-0">
+                <div class="flex items-center gap-1.5 mb-2.5">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-500">Gebucht</p>
+                    <span id="k-count-3" class="ml-auto text-[9px] bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full">0</span>
+                </div>
+                <div id="k-col-3" class="space-y-2.5 min-h-[80px]">
+                    <div class="text-center py-6 border border-dashed border-slate-200 rounded-2xl text-[10px] text-slate-300">
+                        Noch leer
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- To-Do Kurzliste -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-500"><i class="fa-solid fa-list-check text-orange-500 mr-1"></i>Offene To-Dos</h3>
+            <span class="text-[9px] bg-orange-100 text-orange-700 font-bold px-1.5 py-0.5 rounded-full">3 offen</span>
+        </div>
+        <div class="space-y-2">
+            <label class="flex items-start gap-2.5 cursor-pointer">
+                <input type="checkbox" class="mt-0.5 w-4 h-4 rounded border-slate-300 accent-orange-500 shrink-0">
+                <div>
+                    <p class="text-xs font-bold text-slate-700">GEMA-Meldung einreichen</p>
+                    <p class="text-[9px] text-red-400 font-semibold">3 Wochen vor Event fällig!</p>
+                </div>
+            </label>
+            <label class="flex items-start gap-2.5 cursor-pointer">
+                <input type="checkbox" class="mt-0.5 w-4 h-4 rounded border-slate-300 accent-orange-500 shrink-0">
+                <div>
+                    <p class="text-xs font-bold text-slate-700">Ablaufplan an Security senden</p>
+                    <p class="text-[9px] text-slate-400">Sobald Türsteher bestätigt</p>
+                </div>
+            </label>
+            <label class="flex items-start gap-2.5 cursor-pointer">
+                <input type="checkbox" class="mt-0.5 w-4 h-4 rounded border-slate-300 accent-orange-500 shrink-0">
+                <div>
+                    <p class="text-xs font-bold text-slate-700">Allergene & Menüs abfragen</p>
+                    <p class="text-[9px] text-slate-400">Mit finaler Gästezahl</p>
+                </div>
+            </label>
+        </div>
+        <button class="w-full mt-3 bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl transition-colors cursor-pointer hover:bg-slate-800">
+            <i class="fa-solid fa-calendar-plus mr-1 text-amber-400"></i>Kalender-Export (iCal)
+        </button>
+    </div>
+
+</div>
+
+</main>
+
+<script>
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let state = {
+    name: '', type: '', date: '', loc: '', guests: 120, budget: 0,
+    contacted: [], skipped: [],
+    budgetUsed: 0
+};
+
+const CATEGORIES = [
+    {
+        id: 'catering', title: 'Catering & Grill', icon: 'fa-utensils',
+        color: 'from-orange-500 to-amber-400',
+        providers: [
+            { name:'Merguez Express',    stars:5.0, desc:'Orientalisch & Grill-Buffet', price:1075 },
+            { name:'Gaumenfreude FFM',   stars:4.8, desc:'Fingerfood & Flying Buffet',  price:950  },
+            { name:'Klassik Grill Höchst', stars:4.7, desc:'Klassisches Catering', price:870 }
+        ]
+    },
+    {
+        id: 'music', title: 'DJ & Live-Musik', icon: 'fa-music',
+        color: 'from-violet-500 to-purple-400',
+        providers: [
+            { name:'DJ Markus',         stars:5.0, desc:'Pop, Dance, RnB – seit 15 J.', price:850 },
+            { name:'Coverband MainBeat', stars:4.9, desc:'Liveband, 5-köpfig',           price:1800 },
+            { name:'DJane Julia',        stars:4.7, desc:'House & Techno Spezialistin',   price:700 }
+        ]
+    },
+    {
+        id: 'fotograf', title: 'Foto & Video', icon: 'fa-camera',
+        color: 'from-pink-500 to-rose-400',
+        providers: [
+            { name:'Studio Lichtblick',  stars:4.9, desc:'Hochzeiten & Events seit 2012', price:1400 },
+            { name:'FFM Media',          stars:4.8, desc:'Video + Foto Kombipaket',       price:1250 },
+            { name:'Lina Schnappschuss', stars:4.6, desc:'Reportage-Stil, natürlich',     price:900 }
+        ]
+    },
+    {
+        id: 'security', title: 'Türsteher & Security', icon: 'fa-shield-halved',
+        color: 'from-slate-700 to-slate-600',
+        providers: [
+            { name:'Rhein-Main Schutz',   stars:4.9, desc:'Zertifizierter Sicherheitsdienst', price:600 },
+            { name:'Main-Wache Sicherheit', stars:4.8, desc:'Diskreter Einlasskontrolle',    price:520 },
+            { name:'Securitas Elite FFM',  stars:4.6, desc:'Großveranstaltungen',             price:480 }
+        ]
+    },
+    {
+        id: 'location', title: 'Event-Location', icon: 'fa-building',
+        color: 'from-sky-500 to-blue-400',
+        providers: [
+            { name:'Bürgerhaus Griesheim', stars:4.8, desc:'Bis 300 Pers., eigene Küche', price:1200 },
+            { name:'Main-Loft Industrie',  stars:4.7, desc:'Loft-Charakter, 200 m²',      price:1100 },
+            { name:'Gutshof Bornheim',     stars:4.6, desc:'Außenbereich & Scheune',       price:980 }
+        ]
+    },
+    {
+        id: 'technik', title: 'Licht- & Tontechnik', icon: 'fa-lightbulb',
+        color: 'from-teal-500 to-emerald-400',
+        providers: [
+            { name:'MainSound Verleih',    stars:4.9, desc:'PA, Licht, Laser-Komplettset', price:450 },
+            { name:'LaserEffekt Frankfurt', stars:4.7, desc:'Showlaser & LED-Technik',    price:390 },
+            { name:'AudioBros Riedberg',   stars:4.5, desc:'Zuverlässig & günstig',       price:320 }
+        ]
+    }
+];
+
+let currentCardIdx = 0;
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+document.getElementById('i-date').value =
+    new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+/* ═══════════════════════════════════════
+   SCREEN 1 – INPUT
+═══════════════════════════════════════ */
+function setType(type, btn, icon) {
+    state.type = type;
+    document.querySelectorAll('.type-btn').forEach(b => {
+        b.classList.remove('border-amber-500','bg-amber-50','text-amber-800');
+        const i = b.querySelector('i');
+        if (i) i.className = i.className.replace('text-amber-500','text-slate-300');
+    });
+    btn.classList.add('border-amber-500','bg-amber-50','text-amber-800');
+    const ic = btn.querySelector('i');
+    if (ic) ic.className = ic.className.replace('text-slate-300','text-amber-500');
+}
+
+function startSearch() {
+    if (!state.type) { alert('Bitte erst den Event-Typ wählen!'); return; }
+    state.name   = document.getElementById('i-name').value   || 'Mein Event';
+    state.loc    = document.getElementById('i-loc').value    || 'Griesheim';
+    state.guests = document.getElementById('i-guests').value;
+    state.date   = document.getElementById('i-date').value;
+    state.budget = parseInt(document.getElementById('i-budget').value) || 10000;
+
+    show('s-loading');
+    document.getElementById('btn-reset').classList.remove('hidden');
+    runLoadingAnimation();
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 2 – LOADING ANIMATION
+═══════════════════════════════════════ */
+const LOADING_MSGS = [
+    'Standort wird analysiert …',
+    'Verfügbarkeiten prüfen …',
+    'Bewertungen werden gefiltert …',
+    'Budget wird verteilt …',
+    'Top-Anbieter werden sortiert …',
+    'Netzwerk wird gesponnen …',
+    'Fast fertig …'
+];
+
+function runLoadingAnimation() {
+    const fillEl  = document.getElementById('emoji-fill');
+    const pctEl   = document.getElementById('pct-num');
+    const lblEl   = document.getElementById('loading-label');
+    const wrap    = document.getElementById('emoji-wrap');
+    let pct = 0, msgIdx = 0;
+
+    const interval = setInterval(() => {
+        // Unregelmäßiges Tempo für Authentizität
+        const step = pct < 70 ? (Math.random() * 3 + 1) : (Math.random() * 1.5 + 0.3);
+        pct = Math.min(100, pct + step);
+
+        fillEl.style.height = pct + '%';
+        pctEl.textContent   = Math.round(pct);
+
+        // Nachrichten wechseln
+        const newMsgIdx = Math.floor(pct / 15);
+        if (newMsgIdx !== msgIdx && newMsgIdx < LOADING_MSGS.length) {
+            msgIdx = newMsgIdx;
+            lblEl.style.opacity = '0';
+            setTimeout(() => {
+                lblEl.textContent  = LOADING_MSGS[msgIdx];
+                lblEl.style.opacity = '1';
+            }, 200);
+        }
+
+        if (pct >= 100) {
+            clearInterval(interval);
+            // CTA-Overlay einblenden + Pulse-Klasse
+            setTimeout(() => {
+                document.getElementById('cta-overlay').style.opacity = '1';
+                document.getElementById('cta-overlay').style.pointerEvents = 'auto';
+                wrap.classList.add('cta-pulse');
+                lblEl.textContent = '✓ Fertig! Jetzt auf das Emoji tippen.';
+            }, 400);
+        }
+    }, 50);
+}
+
+function onEmojiClick() {
+    const overlay = document.getElementById('cta-overlay');
+    if (overlay.style.opacity !== '1') return; // noch nicht fertig
+    show('s-swipe');
+    currentCardIdx = 0;
+    state.contacted = [];
+    state.skipped   = [];
+    renderCard(currentCardIdx);
+}
+
+/* ═══════════════════════════════════════
+   SCREEN 3 – SWIPE CARDS
+═══════════════════════════════════════ */
+function renderCard(idx) {
+    if (idx >= CATEGORIES.length) { finishSwipe(); return; }
+
+    const cat = CATEGORIES[idx];
+
+    // Dots updaten
+    CATEGORIES.forEach((_, i) => {
+        const d = document.getElementById(`dot-${i}`);
+        d.className = 'w-2 h-2 rounded-full transition-all ' +
+            (i < idx ? 'dot-done' : i === idx ? 'dot-active' : 'dot-inactive');
+    });
+
+    // Icon + Farbe
+    const wrap = document.getElementById('card-icon-wrap');
+    wrap.className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner shrink-0 bg-gradient-to-br ${cat.color}`;
+    document.getElementById('card-icon').className = `fa-solid ${cat.icon} text-white text-2xl`;
+    document.getElementById('card-title').textContent    = cat.title;
+    document.getElementById('card-counter').textContent  = `${idx + 1} / ${CATEGORIES.length}`;
+    document.getElementById('card-location').textContent = `Top-Anbieter in ${state.loc} & Umgebung`;
+
+    // Provider-Liste
+    const container = document.getElementById('card-providers');
+    container.innerHTML = cat.providers.map((p, i) => `
+        <div class="flex items-center gap-3 p-3 rounded-2xl border ${i === 0 ? 'bg-orange-50 border-orange-200' : 'bg-slate-50 border-slate-100'}">
+            <div class="w-7 h-7 rounded-xl ${i === 0 ? 'bg-gradient-to-br '+cat.color : 'bg-slate-200'} flex items-center justify-center shrink-0">
+                <span class="text-white text-[10px] font-black">${i + 1}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-slate-800 truncate">${p.name}</p>
+                <p class="text-[9px] text-slate-400 truncate">${p.desc}</p>
+            </div>
+            <div class="text-right shrink-0">
+                <p class="text-[10px] font-black text-amber-500">★ ${p.stars.toFixed(1)}</p>
+                <p class="text-[9px] text-slate-400 font-mono">ab ${p.price} €</p>
+            </div>
+        </div>
+    `).join('');
+
+    // Summary updaten
+    updateSwipeSummary();
+
+    // Karte zurücksetzen (nach Fly-out)
+    const card = document.getElementById('active-card');
+    card.style.transition = 'none';
+    card.style.transform  = 'translateX(0) rotate(0deg)';
+    card.style.opacity    = '1';
+    card.classList.remove('fly-right','fly-left','snap-back');
+    document.getElementById('lbl-right').style.opacity = '0';
+    document.getElementById('lbl-left').style.opacity  = '0';
+}
+
+function updateSwipeSummary() {
+    const total = state.contacted.length;
+    document.getElementById('swipe-summary').textContent =
+        total > 0 ? `${total} Kategorie${total > 1 ? 'n' : ''} angefragt` : '';
+}
+
+function swipeRight() {
+    state.contacted.push(CATEGORIES[currentCardIdx]);
+    flyCard('right');
+}
+
+function swipeLeft() {
+    state.skipped.push(CATEGORIES[currentCardIdx]);
+    flyCard('left');
+}
+
+function flyCard(dir) {
+    const card = document.getElementById('active-card');
+    card.classList.add(dir === 'right' ? 'fly-right' : 'fly-left');
+    setTimeout(() => {
+        currentCardIdx++;
+        renderCard(currentCardIdx);
+    }, 380);
+}
+
+/* ── Touch / Mouse Drag ── */
+(function initDrag() {
+    const card = document.getElementById('active-card');
+    let startX = 0, dragging = false, dx = 0;
+    const THRESHOLD = 90;
+
+    function onStart(e) {
+        if (e.target.tagName === 'BUTTON') return;
+        startX   = e.clientX ?? e.touches[0].clientX;
+        dragging = true;
+        card.style.transition = 'none';
+    }
+
+    function onMove(e) {
+        if (!dragging) return;
+        const cx = e.clientX ?? (e.touches && e.touches[0].clientX);
+        if (cx === undefined) return;
+        dx = cx - startX;
+        const rot = dx * 0.06;
+        card.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
+        document.getElementById('lbl-right').style.opacity = dx > 20 ? Math.min(1, (dx - 20) / 60) : '0';
+        document.getElementById('lbl-left').style.opacity  = dx < -20 ? Math.min(1, (-dx - 20) / 60) : '0';
+    }
+
+    function onEnd() {
+        if (!dragging) return;
+        dragging = false;
+        if (dx > THRESHOLD)       swipeRight();
+        else if (dx < -THRESHOLD) swipeLeft();
+        else {
+            card.classList.add('snap-back');
+            card.style.transform = 'translateX(0) rotate(0deg)';
+            document.getElementById('lbl-right').style.opacity = '0';
+            document.getElementById('lbl-left').style.opacity  = '0';
+        }
+        dx = 0;
+    }
+
+    card.addEventListener('mousedown',   onStart);
+    card.addEventListener('touchstart',  onStart, { passive:true });
+    document.addEventListener('mousemove',  onMove);
+    document.addEventListener('touchmove',  onMove, { passive:true });
+    document.addEventListener('mouseup',    onEnd);
+    document.addEventListener('touchend',   onEnd);
+})();
+
+/* ── Alle Karten durch → Cockpit ── */
+function finishSwipe() {
+    show('s-cockpit');
+
+    // Event-Header befüllen
+    document.getElementById('cockpit-name').textContent    = state.name;
+    document.getElementById('cockpit-loc').textContent     = state.loc;
+    document.getElementById('cockpit-guests').textContent  = state.guests + ' Gäste';
+    document.getElementById('cockpit-budget').textContent  = state.budget.toLocaleString('de-DE') + ' €';
+
+    // Countdown
+    const eventDate = new Date(state.date);
+    const today     = new Date();
+    const daysLeft  = Math.max(0, Math.round((eventDate - today) / (1000*60*60*24)));
+    document.getElementById('days-left').textContent = daysLeft;
+    const maxDays = 180;
+    document.getElementById('days-bar').style.width = Math.min(100, daysLeft / maxDays * 100) + '%';
+
+    // Kanban befüllen
+    populateKanban();
+    updateBudget();
+}
+
+function populateKanban() {
+    const col1 = document.getElementById('k-col-1');
+    col1.innerHTML = '';
+
+    let count1 = 0;
+    state.contacted.forEach(cat => {
+        cat.providers.slice(0, 3).forEach((p, idx) => {
+            if (idx > 0) return; // Nur Top-Anbieter als erste Anfrage
+            count1++;
+            state.budgetUsed += p.price;
+            col1.insertAdjacentHTML('beforeend', kanbanCard(p, cat, 'sky'));
+        });
+    });
+
+    // Demo: einen Anbieter mit "Angebot erhalten" zeigen
+    if (state.contacted.length > 0) {
+        const demo = state.contacted[0];
+        const p2   = demo.providers[1];
+        document.getElementById('k-col-2').innerHTML = kanbanCard(p2, demo, 'amber', 'Gage: ' + p2.price + ' €');
+        document.getElementById('k-count-2').textContent = '1';
+    }
+
+    document.getElementById('k-count-1').textContent = count1 || '0';
+    if (count1 === 0) col1.innerHTML = '<div class="text-center py-6 border border-dashed border-slate-200 rounded-2xl text-[10px] text-slate-300">Noch leer</div>';
+}
+
+function kanbanCard(provider, cat, color, subtitle) {
+    return `
+        <div class="bg-white border border-${color}-200 rounded-2xl p-3 shadow-xs">
+            <div class="flex items-center gap-2 mb-1.5">
+                <div class="w-6 h-6 rounded-lg bg-gradient-to-br ${cat.color} flex items-center justify-center shrink-0">
+                    <i class="fa-solid ${cat.icon} text-white text-[9px]"></i>
+                </div>
+                <p class="text-[10px] font-bold text-slate-800 truncate flex-1">${provider.name}</p>
+            </div>
+            <p class="text-[9px] text-slate-400">${subtitle || cat.title}</p>
+            <div class="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100">
+                <span class="text-[8px] font-bold text-${color}-600 bg-${color}-50 px-1.5 py-0.5 rounded">
+                    ${color === 'sky' ? 'Angefragt' : color === 'amber' ? 'Angebot liegt vor' : 'Gebucht ✓'}
+                </span>
+                <span class="text-[9px] font-mono text-slate-600">${provider.price} €</span>
+            </div>
+        </div>
+    `;
+}
+
+function updateBudget() {
+    const used  = state.budgetUsed;
+    const total = state.budget;
+    const pct   = total > 0 ? Math.min(100, Math.round(used / total * 100)) : 0;
+
+    document.getElementById('cockpit-budget-used').textContent = used.toLocaleString('de-DE') + ' € vergeben';
+    document.getElementById('budget-fraction').textContent     = used.toLocaleString('de-DE') + ' / ' + total.toLocaleString('de-DE') + ' €';
+    document.getElementById('budget-pct-lbl').textContent      = pct + ' % vergeben';
+    document.getElementById('budget-prog').style.width = pct + '%';
+    document.getElementById('budget-prog').className =
+        'h-full rounded-full transition-all duration-700 ' +
+        (pct > 80 ? 'bg-gradient-to-r from-red-400 to-orange-500' : 'bg-gradient-to-r from-amber-400 to-orange-400');
+}
+
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
+function show(id) {
+    ['s-input','s-loading','s-swipe','s-cockpit'].forEach(s => {
+        document.getElementById(s).classList.toggle('hidden', s !== id);
+    });
+}
+
+function resetAll() {
+    state = { name:'', type:'', date:'', loc:'', guests:120, budget:0, contacted:[], skipped:[], budgetUsed:0 };
+    currentCardIdx = 0;
+
+    document.getElementById('btn-reset').classList.add('hidden');
+    document.getElementById('i-name').value    = '';
+    document.getElementById('i-loc').value     = '';
+    document.getElementById('i-budget').value  = '';
+    document.getElementById('i-guests').value  = 120;
+    document.getElementById('guest-lbl').textContent = '120 Personen';
+    document.getElementById('i-date').value =
+        new Date(Date.now() + 120*24*60*60*1000).toISOString().split('T')[0];
+
+    // Typ-Buttons
+    document.querySelectorAll('.type-btn').forEach(b => {
+        b.classList.remove('border-amber-500','bg-amber-50','text-amber-800');
+        const i = b.querySelector('i');
+        if (i) i.className = i.className.replace('text-amber-500','text-slate-300');
+    });
+
+    // Loading reset
+    document.getElementById('emoji-fill').style.height = '0%';
+    document.getElementById('pct-num').textContent = '0';
+    document.getElementById('loading-label').textContent = 'Standort wird analysiert …';
+    document.getElementById('cta-overlay').style.opacity = '0';
+    document.getElementById('cta-overlay').style.pointerEvents = 'none';
+    document.getElementById('emoji-wrap').classList.remove('cta-pulse');
+
+    // Kanban reset
+    ['k-col-1','k-col-2','k-col-3'].forEach((id, i) => {
+        document.getElementById(id).innerHTML =
+            '<div class="text-center py-6 border border-dashed border-slate-200 rounded-2xl text-[10px] text-slate-300">Noch leer</div>';
+        document.getElementById(`k-count-${i+1}`).textContent = '0';
+    });
+
+    show('s-input');
+}
+</script>
+</body>
+</html>
