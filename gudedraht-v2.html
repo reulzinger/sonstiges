@@ -7,593 +7,484 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ── Body / Hintergrund ── */
-        body { background: #0f172a; }
+        :root {
+            --header-h: 56px;
+        }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body { background: #F2F2F7; font-family: -apple-system, 'Segoe UI', sans-serif; }
 
-        .glass {
-            background: rgba(255,255,255,.06);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,.1);
-        }
-        .glass-light {
-            background: rgba(255,255,255,.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-
-        /* ── Animated Gradient BG (alle Screens) ── */
-        @keyframes bg-shift {
-            0%   { background-position: 0% 50% }
-            50%  { background-position: 100% 50% }
-            100% { background-position: 0% 50% }
-        }
-        .bg-animated {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1035 35%, #0f1f2e 65%, #1a0f2e 100%);
-            background-size: 300% 300%;
-            animation: bg-shift 12s ease infinite;
-            min-height: 100vh;
-        }
-
-        /* ── Glühende Ambient-Orbs ── */
-        .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            z-index: 0;
-        }
-        .orb-1 { width:360px;height:360px;background:rgba(245,158,11,.18);top:-100px;right:-80px; }
-        .orb-2 { width:280px;height:280px;background:rgba(139,92,246,.15);bottom:10%;left:-80px; }
-        .orb-3 { width:200px;height:200px;background:rgba(16,185,129,.12);top:45%;right:-60px; }
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
 
         /* ── Header ── */
-        .header-blur {
-            background: rgba(15,23,42,.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,.07);
+        .header { height: var(--header-h); background:#fff; border-bottom:1px solid #F2F2F7; }
+
+        /* ── Full-screen section base ── */
+        .full-screen {
+            min-height: calc(100dvh - var(--header-h));
+            display: flex;
+            flex-direction: column;
         }
 
-        /* ── Input-Screen Karte ── */
-        .input-card {
-            background: rgba(255,255,255,.04);
-            border: 1px solid rgba(255,255,255,.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 28px;
+        /* ══════════════════════════
+           SCREEN 1 – INPUT
+        ══════════════════════════ */
+        .input-section { background:#F2F2F7; }
+        .input-card { background:#fff; border-radius:24px; }
+        .field {
+            width:100%; padding:13px 14px; background:#F2F2F7; border:1.5px solid transparent;
+            border-radius:14px; font-size:14px; font-weight:500; color:#1e293b;
+            transition: border-color .2s, background .2s; outline:none;
         }
-        .input-field {
-            background: rgba(255,255,255,.06) !important;
-            border: 1px solid rgba(255,255,255,.1) !important;
-            color: #f8fafc !important;
-            border-radius: 14px;
-        }
-        .input-field::placeholder { color: rgba(148,163,184,.5) !important; }
-        .input-field:focus { border-color: rgba(245,158,11,.6) !important; outline: none; box-shadow: 0 0 0 3px rgba(245,158,11,.15); }
+        .field:focus { background:#fff; border-color:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,.12); }
+        .field::placeholder { color:#94a3b8; }
+        input[type=date].field { color:#1e293b; }
+        input[type=range] { accent-color:#f59e0b; }
 
-        /* ── Type-Buttons ── */
         .type-btn {
-            background: rgba(255,255,255,.05);
-            border: 1px solid rgba(255,255,255,.08);
-            color: rgba(148,163,184,.9);
-            border-radius: 16px;
-            transition: all .2s;
+            padding:11px 8px; border-radius:16px; border:2px solid #F2F2F7;
+            background:#F2F2F7; color:#64748b; font-size:13px; font-weight:700;
+            display:flex; align-items:center; justify-content:center; gap:6px;
+            transition:all .2s; cursor:pointer;
         }
-        .type-btn:hover  { background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.4); }
-        .type-btn.active { background: rgba(245,158,11,.18); border-color: #f59e0b; color: #fbbf24; }
+        .type-btn.active { background:#FFF8EC; border-color:#f59e0b; color:#b45309; }
 
-        /* ── Range Slider ── */
-        input[type=range] { accent-color: #f59e0b; }
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button { opacity: .5; }
-
-        /* ── CTA-Button ── */
-        .btn-cta {
-            background: linear-gradient(135deg, #f59e0b, #f97316);
-            color: #0f172a;
-            font-weight: 900;
-            border-radius: 18px;
-            box-shadow: 0 8px 32px rgba(245,158,11,.35);
-            transition: transform .2s, box-shadow .2s;
+        .btn-primary {
+            width:100%; padding:16px; border-radius:18px; font-size:15px; font-weight:900;
+            background:linear-gradient(135deg,#f59e0b,#f97316); color:#fff;
+            box-shadow:0 8px 24px rgba(245,158,11,.35); border:none;
+            cursor:pointer; transition:transform .15s, box-shadow .15s;
         }
-        .btn-cta:hover  { transform: scale(1.02); box-shadow: 0 12px 40px rgba(245,158,11,.45); }
-        .btn-cta:active { transform: scale(.98); }
+        .btn-primary:active { transform:scale(.98); box-shadow:0 4px 16px rgba(245,158,11,.3); }
 
         /* ══════════════════════════
            SCREEN 2 – LOADING
         ══════════════════════════ */
-        @keyframes cta-pulse {
-            0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,.5), 0 0 0 0 rgba(245,158,11,.2) }
-            50%      { box-shadow: 0 0 0 18px rgba(245,158,11,.12), 0 0 0 36px rgba(245,158,11,.04) }
+        @keyframes spin-cw  { to { transform:rotate(360deg); } }
+        @keyframes spin-ccw { to { transform:rotate(-360deg); } }
+        @keyframes cta-glow {
+            0%,100% { box-shadow:0 0 0 0 rgba(245,158,11,.4); }
+            50%      { box-shadow:0 0 0 20px rgba(245,158,11,.0); }
         }
-        .cta-pulse { animation: cta-pulse 1.8s ease-in-out infinite; cursor: pointer; }
+        .spin-cw  { animation: spin-cw  4s linear infinite; }
+        .spin-ccw { animation: spin-ccw 6s linear infinite; }
+        .cta-glow { animation: cta-glow 1.8s ease-in-out infinite; cursor:pointer; }
 
-        @keyframes spin-ring {
-            to { transform: rotate(360deg); }
+        .step-chip {
+            font-size:11px; font-weight:700; padding:6px 12px; border-radius:99px;
+            background:#F2F2F7; color:#94a3b8; border:1.5px solid transparent;
+            transition:all .3s;
         }
-        .ring-spin { animation: spin-ring 3s linear infinite; }
-
-        @keyframes shimmer {
-            0%   { opacity:.6; transform:scale(.98) }
-            50%  { opacity:1;  transform:scale(1.02) }
-            100% { opacity:.6; transform:scale(.98) }
-        }
-        .shimmer-txt { animation: shimmer 2s ease-in-out infinite; }
+        .step-chip.done { background:#FFF8EC; border-color:#f59e0b; color:#b45309; }
 
         /* ══════════════════════════
            SCREEN 3 – SWIPE
         ══════════════════════════ */
         .swipe-card {
-            touch-action: none;
-            user-select: none;
-            will-change: transform;
+            touch-action: none; user-select: none; will-change: transform;
             transition: transform .08s linear;
+            position:absolute; inset:0; border-radius:28px;
+            background:#fff; overflow:hidden;
+            box-shadow:0 8px 40px rgba(0,0,0,.12);
         }
-        .swipe-card.snap-back {
-            transition: transform .45s cubic-bezier(.34,1.56,.64,1) !important;
-        }
-        .swipe-card.fly-right {
-            transition: transform .32s ease-in, opacity .32s ease-in !important;
-            transform: translateX(115vw) rotate(22deg) !important;
-            opacity: 0 !important;
-        }
-        .swipe-card.fly-left {
-            transition: transform .32s ease-in, opacity .32s ease-in !important;
-            transform: translateX(-115vw) rotate(-22deg) !important;
-            opacity: 0 !important;
-        }
-        .lbl-right, .lbl-left { opacity:0; transition: opacity .1s; pointer-events:none; }
+        .swipe-card.snap-back { transition:transform .45s cubic-bezier(.34,1.56,.64,1) !important; }
+        .swipe-card.fly-right { transition:transform .32s ease-in,opacity .32s !important; transform:translateX(120vw) rotate(22deg) !important; opacity:0 !important; }
+        .swipe-card.fly-left  { transition:transform .32s ease-in,opacity .32s !important; transform:translateX(-120vw) rotate(-22deg) !important; opacity:0 !important; }
 
-        /* Provider-Einzel-Karte Hover */
-        .provider-row { transition: background .15s; }
+        .lbl { opacity:0; transition:opacity .1s; pointer-events:none; position:absolute; top:22px; z-index:30; font-weight:900; font-size:15px; padding:6px 16px; border-radius:16px; }
+        .lbl-yes { left:18px; background:#10b981; color:#fff; transform:rotate(-13deg); }
+        .lbl-no  { right:18px; background:#ef4444; color:#fff; transform:rotate(13deg); }
 
-        /* ── Dot-Indikator ── */
-        .dot-active   { background: #f59e0b; transform: scale(1.4); }
-        .dot-done     { background: #10b981; }
-        .dot-inactive { background: rgba(255,255,255,.15); }
+        /* Dot-Indikator */
+        .dot { width:8px; height:8px; border-radius:99px; background:#e2e8f0; transition:all .3s; }
+        .dot.active { background:#f59e0b; width:20px; }
+        .dot.done   { background:#10b981; }
+
+        /* Provider Avatar */
+        .avatar {
+            width:44px; height:44px; border-radius:14px; font-weight:900; font-size:16px;
+            color:#fff; display:flex; align-items:center; justify-content:center;
+            flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,.15);
+        }
+        .avatar-sm {
+            width:28px; height:28px; border-radius:8px; font-weight:900; font-size:11px;
+            color:#fff; display:flex; align-items:center; justify-content:center;
+            flex-shrink:0;
+        }
+
+        /* Category header gradients */
+        .cat-catering  { background:linear-gradient(135deg,#f97316,#f59e0b); }
+        .cat-music     { background:linear-gradient(135deg,#8b5cf6,#6366f1); }
+        .cat-fotograf  { background:linear-gradient(135deg,#ec4899,#f43f5e); }
+        .cat-security  { background:linear-gradient(135deg,#475569,#334155); }
+        .cat-location  { background:linear-gradient(135deg,#0ea5e9,#38bdf8); }
+        .cat-technik   { background:linear-gradient(135deg,#10b981,#14b8a6); }
+
+        /* Provider avatar colors (per name initial) */
+        .av-a { background:linear-gradient(135deg,#f97316,#f59e0b); }
+        .av-b { background:linear-gradient(135deg,#8b5cf6,#6366f1); }
+        .av-c { background:linear-gradient(135deg,#0ea5e9,#38bdf8); }
+        .av-d { background:linear-gradient(135deg,#10b981,#14b8a6); }
+        .av-e { background:linear-gradient(135deg,#ec4899,#f43f5e); }
 
         /* ══════════════════════════
            SCREEN 4 – COCKPIT
         ══════════════════════════ */
-        .kanban-col { min-width: 230px; max-width: 250px; flex-shrink: 0; }
-
-        .timeline-step { flex: 1; position: relative; }
-        .timeline-step::after {
-            content:''; position:absolute; top:50%; right:-1px;
-            width:1px; height:18px; transform:translateY(-50%);
-            background:rgba(255,255,255,.1);
-        }
-        .timeline-step:last-child::after { display:none; }
-
-        /* Kanban-Karte Erscheinen */
         @keyframes card-in {
-            from { opacity:0; transform:translateY(12px) scale(.95) }
+            from { opacity:0; transform:translateY(10px) scale(.97) }
             to   { opacity:1; transform:translateY(0) scale(1) }
         }
-        .card-in { animation: card-in .4s cubic-bezier(.34,1.56,.64,1) both; }
+        .card-in { animation:card-in .35s cubic-bezier(.34,1.56,.64,1) both; }
 
-        /* ── Scrollbar ── */
-        ::-webkit-scrollbar { width:3px; height:3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius:99px; }
+        .kanban-col { min-width:210px; max-width:230px; flex-shrink:0; }
 
-        /* ── Tap-Highlight off ── */
-        * { -webkit-tap-highlight-color: transparent; }
-
-        /* ── Micro interactions ── */
-        @keyframes pop {
-            0%   { transform: scale(.7) }
-            70%  { transform: scale(1.15) }
-            100% { transform: scale(1) }
+        .timeline-pip::after {
+            content:''; position:absolute; right:-1px; top:50%;
+            width:1px; height:16px; background:#e2e8f0; transform:translateY(-50%);
         }
-        .pop { animation: pop .3s ease-out; }
+        .timeline-pip:last-child::after { display:none; }
 
-        /* Color per category */
-        .cat-catering  { background: linear-gradient(135deg,#f97316,#f59e0b); }
-        .cat-music     { background: linear-gradient(135deg,#8b5cf6,#a78bfa); }
-        .cat-fotograf  { background: linear-gradient(135deg,#ec4899,#f43f5e); }
-        .cat-security  { background: linear-gradient(135deg,#475569,#334155); }
-        .cat-location  { background: linear-gradient(135deg,#0ea5e9,#38bdf8); }
-        .cat-technik   { background: linear-gradient(135deg,#10b981,#14b8a6); }
+        /* Checkbox strikethrough */
+        .todo-check:has(input:checked) p { text-decoration:line-through; color:#94a3b8; }
     </style>
 </head>
-<body class="bg-animated font-sans antialiased">
+<body>
 
-<!-- Ambient Orbs -->
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
-
-<!-- ══════════════════════════════════════════════
+<!-- ══════════════════════════════════════
      HEADER
-══════════════════════════════════════════════ -->
-<header class="header-blur sticky top-0 z-50">
-    <div class="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center shadow-lg shrink-0">
-                <i class="fa-solid fa-hands-holding-child text-white text-base"></i>
-            </div>
-            <div>
-                <p class="font-bold text-sm leading-none text-white">Gude Draht</p>
-                <p class="text-[9px] text-amber-400/70 font-bold uppercase tracking-widest mt-0.5">Event-Cockpit</p>
-            </div>
+══════════════════════════════════════ -->
+<header class="header sticky top-0 z-50 flex items-center px-4 justify-between">
+    <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center shadow-md">
+            <i class="fa-solid fa-hands-holding-child text-white text-base"></i>
         </div>
-        <button id="btn-reset" onclick="resetAll()"
-                class="hidden text-[10px] glass text-slate-300 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer hover:bg-white/10">
-            <i class="fa-solid fa-arrow-rotate-left mr-1 text-amber-400"></i>Reset
-        </button>
+        <div>
+            <p class="font-black text-sm text-slate-900 leading-none">Gude Draht</p>
+            <p class="text-[9px] text-amber-500 font-bold uppercase tracking-widest mt-0.5">Event-Cockpit</p>
+        </div>
     </div>
+    <button id="btn-reset" onclick="resetAll()"
+            class="hidden text-[11px] bg-slate-100 text-slate-500 font-bold px-3 py-1.5 rounded-xl cursor-pointer hover:bg-slate-200 transition-colors">
+        <i class="fa-solid fa-arrow-rotate-left mr-1 text-amber-500"></i>Reset
+    </button>
 </header>
 
-<main class="max-w-lg mx-auto px-4 pb-12 relative z-10">
-
-<!-- ══════════════════════════════════════════════
+<!-- ══════════════════════════════════════
      SCREEN 1 – INPUT
-══════════════════════════════════════════════ -->
-<div id="s-input" class="mt-6">
-
-    <!-- Hero-Text -->
-    <div class="text-center mb-6 px-2">
+══════════════════════════════════════ -->
+<div id="s-input" class="full-screen input-section px-4 py-6 gap-5">
+    <div class="text-center">
         <div class="text-5xl mb-3">🎉</div>
-        <h1 class="text-2xl font-black text-white leading-tight">Dein Event.<br><span class="text-amber-400">Dein Netzwerk.</span></h1>
-        <p class="text-xs text-slate-400 mt-2">Sag uns was du feierst — wir bauen dir dein Team.</p>
+        <h1 class="text-2xl font-black text-slate-900">Dein Event.</h1>
+        <h1 class="text-2xl font-black text-amber-500">Dein Netzwerk.</h1>
+        <p class="text-sm text-slate-400 mt-1.5">Sag uns was du feierst — wir bauen dir dein Team.</p>
     </div>
 
-    <div class="input-card p-5 space-y-4">
-
-        <!-- Eventname -->
+    <div class="input-card p-5 space-y-4 shadow-sm">
         <div>
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Eventname</label>
-            <input type="text" id="i-name" placeholder="z.B. Hochzeit Müller-Schmidt"
-                   class="input-field w-full p-3 text-sm font-medium transition-all">
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Eventname</label>
+            <input type="text" id="i-name" placeholder="z.B. Hochzeit Müller-Schmidt" class="field">
         </div>
 
-        <!-- Event-Typ -->
         <div>
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Was steht an?</label>
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Was steht an?</label>
             <div class="grid grid-cols-2 gap-2">
-                <button onclick="setType('Hochzeit',this)"     class="type-btn p-3 text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-heart text-xs opacity-60"></i>Hochzeit
-                </button>
-                <button onclick="setType('Firmenfeier',this)"  class="type-btn p-3 text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-briefcase text-xs opacity-60"></i>Firmenfeier
-                </button>
-                <button onclick="setType('Geburtstag',this)"   class="type-btn p-3 text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-cake-candles text-xs opacity-60"></i>Geburtstag
-                </button>
-                <button onclick="setType('Vereinsfest',this)"  class="type-btn p-3 text-sm font-bold flex items-center justify-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-masks-theater text-xs opacity-60"></i>Vereinsfest
-                </button>
+                <button onclick="setType('Hochzeit',this)"     class="type-btn"><i class="fa-solid fa-heart text-xs"></i>Hochzeit</button>
+                <button onclick="setType('Firmenfeier',this)"  class="type-btn"><i class="fa-solid fa-briefcase text-xs"></i>Firmenfeier</button>
+                <button onclick="setType('Geburtstag',this)"   class="type-btn"><i class="fa-solid fa-cake-candles text-xs"></i>Geburtstag</button>
+                <button onclick="setType('Vereinsfest',this)"  class="type-btn"><i class="fa-solid fa-masks-theater text-xs"></i>Vereinsfest</button>
             </div>
         </div>
 
-        <!-- Datum & Ort -->
         <div class="grid grid-cols-2 gap-3">
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Wann?</label>
-                <input type="date" id="i-date" class="input-field w-full p-3 text-sm font-medium">
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Wann?</label>
+                <input type="date" id="i-date" class="field">
             </div>
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Wo?</label>
-                <input type="text" id="i-loc" placeholder="z.B. Griesheim"
-                       class="input-field w-full p-3 text-sm font-medium">
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Wo?</label>
+                <input type="text" id="i-loc" placeholder="z.B. Griesheim" class="field">
             </div>
         </div>
 
-        <!-- Gäste -->
         <div>
-            <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+            <div class="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
                 <span>Gästeanzahl</span>
-                <span id="guest-lbl" class="text-amber-400 font-mono">120 Personen</span>
+                <span id="guest-lbl" class="text-amber-500 font-mono">120 Personen</span>
             </div>
             <input type="range" id="i-guests" min="20" max="400" value="120"
                    oninput="document.getElementById('guest-lbl').textContent=this.value+' Personen'"
-                   class="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer">
+                   class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-slate-200">
         </div>
 
-        <!-- Budget -->
         <div>
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Gesamtbudget</label>
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Gesamtbudget</label>
             <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-black text-sm pointer-events-none">€</span>
-                <input type="number" id="i-budget" placeholder="z.B. 8000" min="500" step="500"
-                       class="input-field w-full pl-7 pr-3 p-3 text-sm font-medium">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 font-black text-sm pointer-events-none">€</span>
+                <input type="number" id="i-budget" placeholder="z.B. 8000" min="500" step="500" class="field pl-8">
             </div>
         </div>
-
-        <button onclick="startSearch()" class="btn-cta w-full py-4 text-sm cursor-pointer mt-2">
-            Jetzt passende Anbieter suchen <i class="fa-solid fa-magnifying-glass ml-1"></i>
-        </button>
     </div>
+
+    <button onclick="startSearch()" class="btn-primary mt-auto">
+        Passende Anbieter suchen <i class="fa-solid fa-magnifying-glass ml-1.5"></i>
+    </button>
 </div>
 
 
-<!-- ══════════════════════════════════════════════
+<!-- ══════════════════════════════════════
      SCREEN 2 – LOADING
-══════════════════════════════════════════════ -->
-<div id="s-loading" class="hidden mt-10">
+══════════════════════════════════════ -->
+<div id="s-loading" class="hidden full-screen items-center justify-center px-6 gap-8" style="background:#fff;">
 
-    <div class="text-center mb-8">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest shimmer-txt">
-            Wir durchsuchen gerade dein Netzwerk …
-        </p>
+    <div class="text-center">
+        <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Wir suchen dein Netzwerk</p>
     </div>
 
-    <!-- Emoji-Container mit Halo + Fill -->
-    <div class="flex justify-center mb-6">
-        <div class="relative">
-            <!-- Äußerer Halo-Ring (dreht sich) -->
-            <svg class="absolute inset-0 ring-spin" width="200" height="200" viewBox="0 0 200 200">
-                <circle cx="100" cy="100" r="92" fill="none" stroke="rgba(245,158,11,.25)" stroke-width="2"
-                        stroke-dasharray="12 8"/>
-            </svg>
-            <!-- Zweiter Ring (gegenläufig) -->
-            <svg class="absolute inset-0" style="animation:spin-ring 5s linear infinite reverse" width="200" height="200" viewBox="0 0 200 200">
-                <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(139,92,246,.2)" stroke-width="1.5"
-                        stroke-dasharray="6 12"/>
-            </svg>
+    <!-- Großer Emoji-Circle mit Ringen -->
+    <div class="relative flex items-center justify-center" style="width:240px;height:240px;">
+        <!-- Äußerer Ring -->
+        <svg class="spin-cw absolute inset-0" width="240" height="240" viewBox="0 0 240 240">
+            <circle cx="120" cy="120" r="112" fill="none" stroke="#FEF3C7" stroke-width="3" stroke-dasharray="14 8"/>
+        </svg>
+        <!-- Innerer Ring -->
+        <svg class="spin-ccw absolute" style="inset:12px;width:216px;height:216px;" viewBox="0 0 216 216">
+            <circle cx="108" cy="108" r="100" fill="none" stroke="#FDE68A" stroke-width="2" stroke-dasharray="8 14"/>
+        </svg>
 
-            <!-- Emoji Fill Circle -->
-            <div id="emoji-wrap" onclick="onEmojiClick()"
-                 class="relative w-44 h-44 rounded-full overflow-hidden border-2 border-white/10 shadow-2xl cursor-pointer"
-                 style="background:rgba(255,255,255,.04); margin:6px;">
-                <!-- Fill -->
-                <div id="emoji-fill"
-                     class="absolute bottom-0 left-0 right-0 transition-none"
-                     style="height:0%; background:linear-gradient(to top, #f59e0b, #f97316, #fbbf24)"></div>
-                <!-- Emoji -->
-                <div class="absolute inset-0 flex items-center justify-center text-7xl z-10 select-none pointer-events-none">🎉</div>
-                <!-- Done-Overlay -->
-                <div id="cta-overlay"
-                     class="absolute inset-0 flex flex-col items-center justify-center z-20 opacity-0 transition-opacity duration-500 pointer-events-none"
-                     style="background:rgba(245,158,11,.85); backdrop-filter:blur(4px)">
-                    <i class="fa-solid fa-arrow-up text-white text-2xl mb-1"></i>
-                    <p class="text-white font-black text-sm leading-tight text-center">Ergebnisse<br>ansehen!</p>
-                </div>
+        <!-- Emoji Fill Circle -->
+        <div id="emoji-wrap" onclick="onEmojiClick()"
+             class="relative rounded-full overflow-hidden shadow-2xl"
+             style="width:192px;height:192px;background:#FEF3C7;border:3px solid #FDE68A;">
+            <div id="emoji-fill" class="absolute bottom-0 left-0 right-0"
+                 style="height:0%;background:linear-gradient(to top,#f59e0b,#f97316,#fbbf24);transition:none;"></div>
+            <div class="absolute inset-0 flex items-center justify-center z-10 select-none pointer-events-none"
+                 style="font-size:80px;line-height:1">🎉</div>
+            <!-- CTA Overlay -->
+            <div id="cta-overlay" onclick="onEmojiClick()"
+                 class="absolute inset-0 flex flex-col items-center justify-center z-20 opacity-0 transition-opacity duration-500 pointer-events-none"
+                 style="background:rgba(245,158,11,.92);">
+                <i class="fa-solid fa-chevron-up text-white text-xl mb-1"></i>
+                <p class="text-white font-black text-sm text-center leading-tight">Ergebnisse<br>ansehen!</p>
             </div>
         </div>
     </div>
 
-    <!-- Prozent + Label -->
-    <div class="text-center">
-        <p class="text-5xl font-black text-white font-mono tabular-nums">
-            <span id="pct-num">0</span><span class="text-amber-400">%</span>
+    <!-- Prozent -->
+    <div class="text-center -mt-4">
+        <p class="text-6xl font-black text-slate-900 font-mono tabular-nums leading-none">
+            <span id="pct-num">0</span><span class="text-amber-500">%</span>
         </p>
-        <p id="loading-label" class="text-xs text-slate-400 mt-2 h-5 transition-opacity duration-300">
-            Standort wird analysiert …
-        </p>
+        <p id="loading-label" class="text-sm text-slate-400 mt-2 transition-opacity duration-300">Standort wird analysiert …</p>
     </div>
 
-    <!-- Step-Chips -->
-    <div class="flex flex-wrap justify-center gap-2 mt-6" id="step-chips">
-        <div data-thr="15"  class="step-chip text-[9px] font-bold px-3 py-1.5 rounded-full glass text-slate-400 transition-all">📍 Standort</div>
-        <div data-thr="35"  class="step-chip text-[9px] font-bold px-3 py-1.5 rounded-full glass text-slate-400 transition-all">⭐ Bewertungen</div>
-        <div data-thr="55"  class="step-chip text-[9px] font-bold px-3 py-1.5 rounded-full glass text-slate-400 transition-all">💶 Budget</div>
-        <div data-thr="75"  class="step-chip text-[9px] font-bold px-3 py-1.5 rounded-full glass text-slate-400 transition-all">📅 Verfügbarkeit</div>
-        <div data-thr="92"  class="step-chip text-[9px] font-bold px-3 py-1.5 rounded-full glass text-slate-400 transition-all">🔗 Netzwerk</div>
+    <!-- Step Chips -->
+    <div class="flex flex-wrap justify-center gap-2 w-full">
+        <div data-thr="15" class="step-chip">📍 Standort</div>
+        <div data-thr="35" class="step-chip">⭐ Bewertungen</div>
+        <div data-thr="55" class="step-chip">💶 Budget</div>
+        <div data-thr="75" class="step-chip">📅 Verfügbarkeit</div>
+        <div data-thr="92" class="step-chip">🔗 Netzwerk</div>
     </div>
 
-    <!-- Dots -->
-    <div class="flex justify-center gap-1.5 mt-5">
-        <div class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce" style="animation-delay:0s"></div>
-        <div class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style="animation-delay:.15s"></div>
-        <div class="w-1.5 h-1.5 rounded-full bg-amber-300 animate-bounce" style="animation-delay:.3s"></div>
+    <!-- Bouncing Dots -->
+    <div class="flex gap-2">
+        <div class="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style="animation-delay:0s"></div>
+        <div class="w-2 h-2 rounded-full bg-amber-400 animate-bounce" style="animation-delay:.15s"></div>
+        <div class="w-2 h-2 rounded-full bg-amber-300 animate-bounce" style="animation-delay:.3s"></div>
     </div>
 </div>
 
 
-<!-- ══════════════════════════════════════════════
-     SCREEN 3 – SWIPE CARDS
-══════════════════════════════════════════════ -->
-<div id="s-swipe" class="hidden mt-5">
+<!-- ══════════════════════════════════════
+     SCREEN 3 – SWIPE (fullscreen)
+══════════════════════════════════════ -->
+<div id="s-swipe" class="hidden full-screen" style="background:#F2F2F7;">
 
-    <!-- Progress -->
-    <div class="flex items-center justify-center gap-2.5 mb-4">
-        <div id="dot-0" class="w-2.5 h-2.5 rounded-full dot-active  transition-all duration-300"></div>
-        <div id="dot-1" class="w-2.5 h-2.5 rounded-full dot-inactive transition-all duration-300"></div>
-        <div id="dot-2" class="w-2.5 h-2.5 rounded-full dot-inactive transition-all duration-300"></div>
-        <div id="dot-3" class="w-2.5 h-2.5 rounded-full dot-inactive transition-all duration-300"></div>
-        <div id="dot-4" class="w-2.5 h-2.5 rounded-full dot-inactive transition-all duration-300"></div>
-        <div id="dot-5" class="w-2.5 h-2.5 rounded-full dot-inactive transition-all duration-300"></div>
+    <!-- Progress Dots + Counter -->
+    <div class="flex items-center justify-between px-5 py-3 shrink-0">
+        <div class="flex items-center gap-1.5">
+            <div id="dot-0" class="dot active"></div>
+            <div id="dot-1" class="dot"></div>
+            <div id="dot-2" class="dot"></div>
+            <div id="dot-3" class="dot"></div>
+            <div id="dot-4" class="dot"></div>
+            <div id="dot-5" class="dot"></div>
+        </div>
+        <p id="swipe-summary" class="text-xs font-bold text-slate-400"></p>
     </div>
 
-    <!-- Karten-Stack -->
-    <div class="relative" style="height:470px">
-        <!-- Schatten-Karten -->
-        <div class="absolute inset-x-5 inset-y-0 rounded-3xl" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);transform:scale(.92) translateY(20px);z-index:0"></div>
-        <div class="absolute inset-x-2.5 inset-y-0 rounded-3xl" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);transform:scale(.96) translateY(10px);z-index:1"></div>
+    <!-- Karten-Stack Container – füllt restlichen Platz -->
+    <div class="flex-1 relative mx-4 mb-4">
+        <!-- Schatten-Karten hinter der aktiven -->
+        <div class="absolute inset-x-4 inset-y-0 rounded-[28px] bg-white"
+             style="transform:scale(.93) translateY(18px);z-index:0;box-shadow:0 4px 20px rgba(0,0,0,.07)"></div>
+        <div class="absolute inset-x-2 inset-y-0 rounded-[28px] bg-white"
+             style="transform:scale(.96) translateY(9px);z-index:1;box-shadow:0 4px 24px rgba(0,0,0,.09)"></div>
 
-        <!-- Aktive Karte – Flex-Column damit Inhalt den Raum ausfüllt -->
-        <div id="active-card" class="absolute inset-0 rounded-3xl shadow-2xl z-10 swipe-card overflow-hidden flex flex-col"
-             style="background:rgba(255,255,255,.07);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12)">
+        <!-- Aktive Karte -->
+        <div id="active-card" class="swipe-card flex flex-col z-10">
 
-            <!-- Rechts-Label -->
-            <div id="lbl-right" class="lbl-right absolute top-6 left-5 z-20 bg-emerald-500 text-white font-black text-base px-4 py-1.5 rounded-2xl shadow-lg" style="transform:rotate(-14deg)">
-                ANFRAGEN ✓
-            </div>
-            <!-- Links-Label -->
-            <div id="lbl-left" class="lbl-left absolute top-6 right-5 z-20 bg-slate-600/90 text-white font-black text-base px-4 py-1.5 rounded-2xl shadow-lg" style="transform:rotate(14deg)">
-                SKIP ✕
-            </div>
+            <!-- Swipe Labels -->
+            <div id="lbl-right" class="lbl lbl-yes">ANFRAGEN ✓</div>
+            <div id="lbl-left"  class="lbl lbl-no">SKIP ✕</div>
 
-            <!-- Farbiger Kategorie-Header -->
-            <div id="card-header" class="cat-catering p-5 pb-4 relative overflow-hidden shrink-0">
-                <div class="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10"></div>
-                <div class="absolute -bottom-10 -left-6 w-24 h-24 rounded-full bg-white/10"></div>
+            <!-- Farbiger Category-Header -->
+            <div id="card-header" class="cat-catering shrink-0 relative overflow-hidden" style="padding:20px 20px 18px;">
+                <div class="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-white/10"></div>
+                <div class="absolute -bottom-12 -left-8 w-28 h-28 rounded-full bg-white/10"></div>
                 <div class="flex items-center gap-3 relative z-10">
-                    <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner shrink-0">
+                    <div class="w-14 h-14 rounded-2xl bg-white/25 flex items-center justify-center shadow-inner shrink-0">
                         <i id="card-icon" class="fa-solid fa-utensils text-white text-2xl"></i>
                     </div>
                     <div class="flex-1">
-                        <p class="text-[9px] font-bold text-white/60 uppercase tracking-widest">Kategorie</p>
-                        <h2 id="card-title" class="text-xl font-black text-white leading-tight">Catering & Grill</h2>
-                        <p id="card-loc" class="text-[10px] text-white/70 mt-0.5">
-                            <i class="fa-solid fa-location-dot mr-0.5"></i>Top in Griesheim & Umgebung
+                        <p class="text-[9px] font-black text-white/60 uppercase tracking-widest">Kategorie</p>
+                        <h2 id="card-title" class="text-[22px] font-black text-white leading-tight">Catering & Grill</h2>
+                        <p id="card-loc" class="text-xs text-white/70 mt-0.5">
+                            <i class="fa-solid fa-location-dot mr-0.5"></i>Top in Griesheim
                         </p>
                     </div>
-                    <span id="card-counter" class="text-xs font-bold text-white/60 self-start">1 / 6</span>
+                    <span id="card-counter" class="text-xs font-black text-white/60 self-start">1 / 6</span>
                 </div>
             </div>
 
-            <!-- Provider-Liste – flex-1 füllt den gesamten verbleibenden Raum -->
-            <div class="flex-1 flex flex-col justify-evenly px-4 py-3 gap-2" id="card-providers"></div>
+            <!-- Provider-Liste: flex-1, equidistant -->
+            <div class="flex-1 flex flex-col justify-evenly px-4 py-2" id="card-providers"></div>
 
-            <!-- Action-Buttons – immer unten, kein absolute mehr nötig -->
-            <div class="shrink-0 px-4 pb-4 pt-2">
-                <div class="flex gap-2.5">
+            <!-- Buttons -->
+            <div class="shrink-0 px-4 pb-5 pt-2">
+                <div class="flex gap-3">
                     <button onclick="swipeLeft()"
-                            class="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm cursor-pointer transition-all"
-                            style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:rgba(148,163,184,.9)">
-                        <i class="fa-solid fa-xmark text-slate-400"></i> Skip
+                            class="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm cursor-pointer bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">
+                        <i class="fa-solid fa-xmark"></i> Skip
                     </button>
                     <button onclick="swipeRight()"
-                            class="flex-[2] flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-sm cursor-pointer transition-all btn-cta">
+                            class="flex-[2.5] flex items-center justify-center gap-2 py-3.5 rounded-2xl font-black text-sm cursor-pointer btn-primary" style="padding-top:14px;padding-bottom:14px;">
                         <i class="fa-solid fa-paper-plane"></i> Alle anfragen
                     </button>
                 </div>
-                <p class="text-center text-[9px] text-white/20 mt-2 font-bold uppercase tracking-wider">← wischen oder Buttons tippen →</p>
+                <p class="text-center text-[9px] text-slate-300 font-bold uppercase tracking-wider mt-2">← wischen oder Buttons tippen →</p>
             </div>
         </div>
-    </div>
-
-    <!-- Zwischen-Summary -->
-    <div class="text-center mt-4">
-        <p id="swipe-summary" class="text-xs text-slate-400"></p>
     </div>
 </div>
 
 
-<!-- ══════════════════════════════════════════════
-     SCREEN 4 – PLANUNGS-COCKPIT
-══════════════════════════════════════════════ -->
-<div id="s-cockpit" class="hidden mt-5 space-y-4">
+<!-- ══════════════════════════════════════
+     SCREEN 4 – COCKPIT
+══════════════════════════════════════ -->
+<div id="s-cockpit" class="hidden full-screen pb-8 gap-4 px-4 py-4" style="background:#F2F2F7;">
 
-    <!-- Event-Hero-Card -->
-    <div class="rounded-3xl overflow-hidden shadow-2xl"
-         style="background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(249,115,22,.15));border:1px solid rgba(245,158,11,.3);backdrop-filter:blur(16px)">
-
-        <!-- Event-Header: Name oben, Meta + Budget unten -->
-        <div class="px-5 pt-5 pb-3">
-            <!-- Label-Zeile -->
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-base">🎉</span>
-                <p class="text-[9px] font-bold text-amber-400/70 uppercase tracking-widest">Aktives Event</p>
+    <!-- Event Hero -->
+    <div class="bg-white rounded-3xl p-5 shadow-sm">
+        <div class="flex items-start justify-between gap-3">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <span class="text-base">🎉</span>
+                    <p class="text-[9px] font-black text-amber-500 uppercase tracking-widest">Aktives Event</p>
+                </div>
+                <h2 class="text-lg font-black text-slate-900 leading-snug line-clamp-2" id="cockpit-name">Mein Event</h2>
+                <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[10px] text-slate-500">
+                    <span><i class="fa-solid fa-location-dot text-amber-500 mr-1"></i><span id="cockpit-loc">—</span></span>
+                    <span><i class="fa-solid fa-users text-amber-500 mr-1"></i><span id="cockpit-guests">—</span></span>
+                    <span><i class="fa-solid fa-calendar text-amber-500 mr-1"></i><span id="cockpit-date">—</span></span>
+                </div>
             </div>
-            <!-- Name – 2 Zeilen max, dann truncate -->
-            <h2 class="text-lg font-black text-white leading-snug line-clamp-2" id="cockpit-name">Mein Event</h2>
-            <!-- Meta-Zeile + Budget nebeneinander -->
-            <div class="flex items-end justify-between mt-2 gap-3">
-                <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-slate-300 min-w-0">
-                    <span class="flex items-center gap-1 shrink-0"><i class="fa-solid fa-location-dot text-amber-400"></i><span id="cockpit-loc">—</span></span>
-                    <span class="flex items-center gap-1 shrink-0"><i class="fa-solid fa-users text-amber-400"></i><span id="cockpit-guests">—</span></span>
-                    <span class="flex items-center gap-1 shrink-0"><i class="fa-solid fa-calendar text-amber-400"></i><span id="cockpit-date">—</span></span>
-                </div>
-                <!-- Budget-Chip rechts -->
-                <div class="shrink-0 text-right"
-                     style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:14px;padding:6px 10px">
-                    <p class="text-[8px] text-amber-400/60 font-bold uppercase tracking-wider leading-none mb-0.5">Budget</p>
-                    <p class="text-base font-black font-mono text-amber-400 leading-none" id="cockpit-budget">—</p>
-                    <p class="text-[8px] font-bold text-emerald-400 leading-none mt-0.5" id="cockpit-used-lbl">0 € vergeben</p>
-                </div>
+            <!-- Budget Chip -->
+            <div class="shrink-0 bg-amber-50 border border-amber-200 rounded-2xl px-3 py-2 text-right">
+                <p class="text-[8px] font-black text-amber-600 uppercase tracking-wider">Budget</p>
+                <p class="text-base font-black font-mono text-amber-500 leading-snug" id="cockpit-budget">—</p>
+                <p class="text-[8px] font-bold text-emerald-500 mt-0.5" id="cockpit-used-lbl">0 € vergeben</p>
             </div>
         </div>
 
-        <!-- Budget-Progress -->
-        <div class="px-5 pb-2">
-            <div class="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div id="budget-prog" class="h-full rounded-full transition-all duration-1000"
+        <!-- Budget Bar -->
+        <div class="mt-3">
+            <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div id="budget-prog" class="h-full rounded-full transition-all duration-700"
                      style="width:0%;background:linear-gradient(90deg,#f59e0b,#f97316)"></div>
             </div>
-            <div class="flex justify-between text-[8px] text-white/30 font-bold mt-1">
+            <div class="flex justify-between text-[9px] text-slate-400 font-bold mt-1">
                 <span>0 €</span>
                 <span id="budget-pct-lbl">0 % vergeben</span>
                 <span id="budget-total-lbl">—</span>
             </div>
         </div>
+    </div>
 
-        <!-- Countdown-Timeline -->
-        <div class="mx-5 mb-5 mt-2 rounded-2xl p-3" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-[9px] font-bold text-white/50 uppercase tracking-wider">Countdown bis Event</p>
-                <p class="text-sm font-black text-amber-400 font-mono"><span id="days-left">—</span> Tage</p>
+    <!-- Countdown -->
+    <div class="bg-white rounded-3xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-black text-slate-500 uppercase tracking-wider">Countdown bis Event</p>
+            <p class="text-sm font-black text-amber-500 font-mono"><span id="days-left">—</span> Tage</p>
+        </div>
+        <div class="h-2 bg-slate-100 rounded-full overflow-hidden mb-3">
+            <div id="days-bar" class="h-full rounded-full transition-all duration-1000"
+                 style="width:60%;background:linear-gradient(90deg,#10b981,#34d399)"></div>
+        </div>
+        <div class="flex">
+            <div class="flex-1 text-center relative timeline-pip">
+                <p class="text-[9px] font-black text-emerald-500">● Jetzt</p>
+                <p class="text-[7px] text-slate-400 mt-0.5">Anfragen</p>
             </div>
-            <div class="h-1.5 bg-white/10 rounded-full overflow-hidden mb-3">
-                <div id="days-bar" class="h-full rounded-full transition-all duration-1000"
-                     style="width:60%;background:linear-gradient(90deg,#10b981,#34d399)"></div>
+            <div class="flex-1 text-center relative timeline-pip">
+                <p class="text-[9px] font-bold text-amber-500">−8 Wo</p>
+                <p class="text-[7px] text-slate-400 mt-0.5">Verträge</p>
             </div>
-            <div class="flex">
-                <div class="timeline-step text-center">
-                    <p class="text-[8px] font-black text-emerald-400">● Jetzt</p>
-                    <p class="text-[7px] text-white/30 mt-0.5">Anfragen</p>
-                </div>
-                <div class="timeline-step text-center">
-                    <p class="text-[8px] font-bold text-amber-400">−8 Wo</p>
-                    <p class="text-[7px] text-white/30 mt-0.5">Verträge</p>
-                </div>
-                <div class="timeline-step text-center">
-                    <p class="text-[8px] font-bold text-amber-400">−4 Wo</p>
-                    <p class="text-[7px] text-white/30 mt-0.5">Anzahl.</p>
-                </div>
-                <div class="timeline-step text-center">
-                    <p class="text-[8px] font-bold text-white/40">−1 Wo</p>
-                    <p class="text-[7px] text-white/30 mt-0.5">Details</p>
-                </div>
-                <div class="timeline-step text-center">
-                    <p class="text-[8px] font-bold text-white/40">🎉</p>
-                    <p class="text-[7px] text-white/30 mt-0.5">Event!</p>
-                </div>
+            <div class="flex-1 text-center relative timeline-pip">
+                <p class="text-[9px] font-bold text-amber-500">−4 Wo</p>
+                <p class="text-[7px] text-slate-400 mt-0.5">Anzahl.</p>
+            </div>
+            <div class="flex-1 text-center relative timeline-pip">
+                <p class="text-[9px] font-bold text-slate-300">−1 Wo</p>
+                <p class="text-[7px] text-slate-300 mt-0.5">Details</p>
+            </div>
+            <div class="flex-1 text-center relative timeline-pip">
+                <p class="text-[9px] font-bold text-slate-300">🎉</p>
+                <p class="text-[7px] text-slate-300 mt-0.5">Event!</p>
             </div>
         </div>
     </div>
 
-    <!-- Kanban Pipeline -->
+    <!-- Kanban -->
     <div>
-        <div class="flex items-center justify-between mb-3">
-            <h3 class="font-black text-sm text-white">Anbieter-Pipeline</h3>
-            <p class="text-[9px] text-white/30 font-bold">← scrollen →</p>
+        <div class="flex items-center justify-between mb-2.5">
+            <h3 class="font-black text-sm text-slate-900">Anbieter-Pipeline</h3>
+            <p class="text-[10px] text-slate-400 font-bold">← scrollen →</p>
         </div>
-        <div class="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory">
+        <div class="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory">
 
-            <!-- Angefragt -->
             <div class="kanban-col snap-start">
-                <div class="flex items-center gap-1.5 mb-2.5">
-                    <div class="w-2 h-2 rounded-full bg-sky-400 shadow-sm shadow-sky-400/50"></div>
-                    <p class="text-[10px] font-black uppercase tracking-wider text-white/50">Angefragt</p>
-                    <span id="k-count-1" class="ml-auto text-[8px] font-bold px-1.5 py-0.5 rounded-full"
-                          style="background:rgba(56,189,248,.15);color:#38bdf8">0</span>
+                <div class="flex items-center gap-1.5 mb-2">
+                    <div class="w-2 h-2 rounded-full bg-sky-400"></div>
+                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-500">Angefragt</p>
+                    <span id="k-count-1" class="ml-auto text-[8px] font-black px-1.5 py-0.5 rounded-full bg-sky-100 text-sky-600">0</span>
                 </div>
-                <div id="k-col-1" class="space-y-2.5 min-h-[80px]">
-                    <div class="text-center py-6 rounded-2xl text-[9px] text-white/20"
-                         style="border:1px dashed rgba(255,255,255,.1)">Noch leer</div>
+                <div id="k-col-1" class="space-y-2 min-h-16">
+                    <div class="text-center py-5 rounded-2xl text-[10px] text-slate-300 border border-dashed border-slate-200 bg-white">Noch leer</div>
                 </div>
             </div>
 
-            <!-- Angebot -->
             <div class="kanban-col snap-start">
-                <div class="flex items-center gap-1.5 mb-2.5">
-                    <div class="w-2 h-2 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50"></div>
-                    <p class="text-[10px] font-black uppercase tracking-wider text-white/50">Angebot</p>
-                    <span id="k-count-2" class="ml-auto text-[8px] font-bold px-1.5 py-0.5 rounded-full"
-                          style="background:rgba(245,158,11,.15);color:#f59e0b">0</span>
+                <div class="flex items-center gap-1.5 mb-2">
+                    <div class="w-2 h-2 rounded-full bg-amber-400"></div>
+                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-500">Angebot</p>
+                    <span id="k-count-2" class="ml-auto text-[8px] font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-600">0</span>
                 </div>
-                <div id="k-col-2" class="space-y-2.5 min-h-[80px]">
-                    <div class="text-center py-6 rounded-2xl text-[9px] text-white/20"
-                         style="border:1px dashed rgba(255,255,255,.1)">Noch leer</div>
+                <div id="k-col-2" class="space-y-2 min-h-16">
+                    <div class="text-center py-5 rounded-2xl text-[10px] text-slate-300 border border-dashed border-slate-200 bg-white">Noch leer</div>
                 </div>
             </div>
 
-            <!-- Gebucht -->
             <div class="kanban-col snap-start">
-                <div class="flex items-center gap-1.5 mb-2.5">
-                    <div class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></div>
-                    <p class="text-[10px] font-black uppercase tracking-wider text-white/50">Gebucht</p>
-                    <span id="k-count-3" class="ml-auto text-[8px] font-bold px-1.5 py-0.5 rounded-full"
-                          style="background:rgba(16,185,129,.15);color:#10b981">0</span>
+                <div class="flex items-center gap-1.5 mb-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-500">Gebucht</p>
+                    <span id="k-count-3" class="ml-auto text-[8px] font-black px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-600">0</span>
                 </div>
-                <div id="k-col-3" class="space-y-2.5 min-h-[80px]">
-                    <div class="text-center py-6 rounded-2xl text-[9px] text-white/20"
-                         style="border:1px dashed rgba(255,255,255,.1)">Noch leer</div>
+                <div id="k-col-3" class="space-y-2 min-h-16">
+                    <div class="text-center py-5 rounded-2xl text-[10px] text-slate-300 border border-dashed border-slate-200 bg-white">Noch leer</div>
                 </div>
             </div>
 
@@ -601,128 +492,130 @@
     </div>
 
     <!-- To-Dos -->
-    <div class="rounded-2xl p-4" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)">
+    <div class="bg-white rounded-3xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xs font-black uppercase tracking-wider text-white/60">
-                <i class="fa-solid fa-list-check text-orange-400 mr-1.5"></i>Offene To-Dos
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-500">
+                <i class="fa-solid fa-list-check text-orange-500 mr-1.5"></i>Offene To-Dos
             </h3>
-            <span class="text-[8px] font-bold px-2 py-0.5 rounded-full"
-                  style="background:rgba(249,115,22,.15);color:#f97316">3 offen</span>
+            <span class="text-[9px] font-black bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">3 offen</span>
         </div>
-        <div class="space-y-2.5">
-            <label class="flex items-start gap-3 cursor-pointer group">
-                <input type="checkbox" class="mt-0.5 w-4 h-4 rounded border-white/20 accent-orange-500 shrink-0">
+        <div class="space-y-3">
+            <label class="todo-check flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" class="mt-0.5 w-4 h-4 rounded border-slate-300 accent-orange-500 shrink-0">
                 <div>
-                    <p class="text-xs font-bold text-white/80 group-has-[:checked]:line-through group-has-[:checked]:text-white/30 transition-all">
-                        GEMA-Meldung einreichen
-                    </p>
-                    <p class="text-[9px] text-red-400 font-semibold mt-0.5">⏰ 3 Wochen vor Event fällig!</p>
+                    <p class="text-sm font-bold text-slate-800">GEMA-Meldung einreichen</p>
+                    <p class="text-[10px] text-red-500 font-bold mt-0.5">⏰ 3 Wochen vor Event fällig!</p>
                 </div>
             </label>
-            <label class="flex items-start gap-3 cursor-pointer group">
-                <input type="checkbox" class="mt-0.5 w-4 h-4 rounded border-white/20 accent-orange-500 shrink-0">
+            <label class="todo-check flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" class="mt-0.5 w-4 h-4 rounded border-slate-300 accent-orange-500 shrink-0">
                 <div>
-                    <p class="text-xs font-bold text-white/80 group-has-[:checked]:line-through group-has-[:checked]:text-white/30 transition-all">
-                        Ablaufplan an Security senden
-                    </p>
-                    <p class="text-[9px] text-white/30 mt-0.5">Sobald Türsteher bestätigt</p>
+                    <p class="text-sm font-bold text-slate-800">Ablaufplan an Security senden</p>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Sobald Türsteher bestätigt</p>
                 </div>
             </label>
-            <label class="flex items-start gap-3 cursor-pointer group">
-                <input type="checkbox" class="mt-0.5 w-4 h-4 rounded border-white/20 accent-orange-500 shrink-0">
+            <label class="todo-check flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" class="mt-0.5 w-4 h-4 rounded border-slate-300 accent-orange-500 shrink-0">
                 <div>
-                    <p class="text-xs font-bold text-white/80 group-has-[:checked]:line-through group-has-[:checked]:text-white/30 transition-all">
-                        Allergene & Menüoptionen abfragen
-                    </p>
-                    <p class="text-[9px] text-white/30 mt-0.5">Mit finaler Gästezahl</p>
+                    <p class="text-sm font-bold text-slate-800">Allergene & Menüoptionen abfragen</p>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Mit finaler Gästezahl</p>
                 </div>
             </label>
         </div>
-        <button class="w-full mt-4 py-3 rounded-2xl font-black text-xs cursor-pointer transition-all btn-cta">
+        <button class="btn-primary mt-4">
             <i class="fa-solid fa-calendar-plus mr-1.5"></i>Kalender-Export (iCal)
         </button>
     </div>
 
 </div>
 
-</main>
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl opacity-0 transition-opacity duration-200 pointer-events-none">
+    ⚠ Bitte erst den Event-Typ wählen!
+</div>
 
 <script>
-/* ═══════════════════════════════════════
+/* ═══════════════════════════
    DATA
-═══════════════════════════════════════ */
+═══════════════════════════ */
+// Avatar gradient per provider index within category
+const AV_COLORS = [
+    'background:linear-gradient(135deg,#f97316,#f59e0b)',
+    'background:linear-gradient(135deg,#8b5cf6,#6366f1)',
+    'background:linear-gradient(135deg,#0ea5e9,#38bdf8)',
+];
+
 const CATEGORIES = [
     {
         id:'catering', title:'Catering & Grill', icon:'fa-utensils', css:'cat-catering',
         providers:[
-            { name:'Merguez Express',      stars:5.0, desc:'Orientalisch · Grill-Buffet',  price:1075 },
-            { name:'Gaumenfreude FFM',      stars:4.8, desc:'Fingerfood · Flying Buffet',   price:950  },
-            { name:'Klassik Grill Höchst',  stars:4.7, desc:'Klassisches Catering',         price:870  }
+            { name:'Merguez Express',       stars:5.0, desc:'Orientalisch · Grill-Buffet',  price:1075, emoji:'🍖' },
+            { name:'Gaumenfreude FFM',       stars:4.8, desc:'Fingerfood · Flying Buffet',   price:950,  emoji:'🥗' },
+            { name:'Klassik Grill Höchst',   stars:4.7, desc:'Klassisches Catering',         price:870,  emoji:'🔥' },
         ]
     },
     {
         id:'music', title:'DJ & Live-Musik', icon:'fa-music', css:'cat-music',
         providers:[
-            { name:'DJ Markus',         stars:5.0, desc:'Pop · Dance · RnB',          price:850  },
-            { name:'Coverband MainBeat', stars:4.9, desc:'Liveband · 5-köpfig',        price:1800 },
-            { name:'DJane Julia',        stars:4.7, desc:'House & Techno',             price:700  }
+            { name:'DJ Markus',          stars:5.0, desc:'Pop · Dance · RnB',           price:850,  emoji:'🎧' },
+            { name:'Coverband MainBeat',  stars:4.9, desc:'Liveband · 5 Musiker',        price:1800, emoji:'🎸' },
+            { name:'DJane Julia',         stars:4.7, desc:'House & Techno',              price:700,  emoji:'🎵' },
         ]
     },
     {
         id:'fotograf', title:'Foto & Video', icon:'fa-camera', css:'cat-fotograf',
         providers:[
-            { name:'Studio Lichtblick',  stars:4.9, desc:'Hochzeiten & Events',       price:1400 },
-            { name:'FFM Media',           stars:4.8, desc:'Video + Foto Kombi',        price:1250 },
-            { name:'Lina Schnappschuss',  stars:4.6, desc:'Reportage-Stil',            price:900  }
+            { name:'Studio Lichtblick',  stars:4.9, desc:'Hochzeiten & Events',         price:1400, emoji:'📸' },
+            { name:'FFM Media',           stars:4.8, desc:'Video + Foto Kombi',          price:1250, emoji:'🎬' },
+            { name:'Lina Schnappschuss',  stars:4.6, desc:'Reportage-Stil',              price:900,  emoji:'🖼️' },
         ]
     },
     {
         id:'security', title:'Türsteher & Security', icon:'fa-shield-halved', css:'cat-security',
         providers:[
-            { name:'Rhein-Main Schutz',    stars:4.9, desc:'Zertifizierter Dienst',   price:600  },
-            { name:'Main-Wache Sicherheit', stars:4.8, desc:'Diskrete Kontrolle',     price:520  },
-            { name:'Securitas Elite FFM',   stars:4.6, desc:'Großveranstaltungen',     price:480  }
+            { name:'Rhein-Main Schutz',    stars:4.9, desc:'Zertifizierter Dienst',     price:600,  emoji:'🛡️' },
+            { name:'Main-Wache',           stars:4.8, desc:'Diskrete Einlasskontrolle', price:520,  emoji:'👮' },
+            { name:'Securitas Elite FFM',  stars:4.6, desc:'Großveranstaltungen',       price:480,  emoji:'🔒' },
         ]
     },
     {
         id:'location', title:'Event-Location', icon:'fa-building', css:'cat-location',
         providers:[
-            { name:'Bürgerhaus Griesheim', stars:4.8, desc:'Bis 300 Pers. · eig. Küche', price:1200 },
-            { name:'Main-Loft Industrie',  stars:4.7, desc:'Loft-Charakter · 200 m²',    price:1100 },
-            { name:'Gutshof Bornheim',     stars:4.6, desc:'Außenbereich & Scheune',      price:980  }
+            { name:'Bürgerhaus Griesheim', stars:4.8, desc:'Bis 300 Pers. · eig. Küche', price:1200, emoji:'🏛️' },
+            { name:'Main-Loft Industrie',  stars:4.7, desc:'Loft · 200 m²',               price:1100, emoji:'🏗️' },
+            { name:'Gutshof Bornheim',     stars:4.6, desc:'Außenbereich & Scheune',       price:980,  emoji:'🌿' },
         ]
     },
     {
         id:'technik', title:'Licht & Tontechnik', icon:'fa-lightbulb', css:'cat-technik',
         providers:[
-            { name:'MainSound Verleih',     stars:4.9, desc:'PA · Licht · Laser Komplett', price:450 },
-            { name:'LaserEffekt Frankfurt',  stars:4.7, desc:'Showlaser & LED',             price:390 },
-            { name:'AudioBros Riedberg',     stars:4.5, desc:'Zuverlässig & günstig',       price:320 }
+            { name:'MainSound Verleih',     stars:4.9, desc:'PA · Licht · Laser komplett', price:450, emoji:'🔊' },
+            { name:'LaserEffekt Frankfurt',  stars:4.7, desc:'Showlaser & LED',             price:390, emoji:'💡' },
+            { name:'AudioBros Riedberg',     stars:4.5, desc:'Zuverlässig & günstig',       price:320, emoji:'🎛️' },
         ]
     }
 ];
 
-/* ═══════════════════════════════════════
+/* ═══════════════════════════
    STATE
-═══════════════════════════════════════ */
-let state = { name:'', type:'', date:'', loc:'', guests:120, budget:0, contacted:[], skipped:[], budgetUsed:0 };
-let currentIdx = 0;
+═══════════════════════════ */
+let state = { name:'', type:'', date:'', loc:'', guests:120, budget:0, contacted:[], budgetUsed:0 };
+let cardIdx = 0;
 
-/* ── Init date ── */
 document.getElementById('i-date').value =
     new Date(Date.now() + 120*24*60*60*1000).toISOString().split('T')[0];
 
-/* ═══════════════════════════════════════
+/* ═══════════════════════════
    SCREEN 1
-═══════════════════════════════════════ */
-function setType(type, btn) {
-    state.type = type;
+═══════════════════════════ */
+function setType(t, btn) {
+    state.type = t;
     document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 }
 
 function startSearch() {
-    if (!state.type) { showToast('Bitte erst den Event-Typ wählen! 👆'); return; }
+    if (!state.type) { showToast(); return; }
     state.name   = document.getElementById('i-name').value   || 'Mein Event';
     state.loc    = document.getElementById('i-loc').value    || 'Griesheim';
     state.guests = document.getElementById('i-guests').value;
@@ -733,59 +626,36 @@ function startSearch() {
     runLoading();
 }
 
-/* ═══════════════════════════════════════
-   SCREEN 2 – LOADING
-═══════════════════════════════════════ */
-const MSGS = [
-    'Standort wird analysiert …',
-    'Bewertungen werden gefiltert …',
-    'Budget wird verteilt …',
-    'Verfügbarkeiten prüfen …',
-    'Top-Anbieter sortieren …',
-    'Netzwerk wird gesponnen …',
-    'Fast fertig …'
-];
+/* ═══════════════════════════
+   SCREEN 2
+═══════════════════════════ */
+const MSGS = ['Standort wird analysiert …','Bewertungen filtern …','Budget verteilen …','Verfügbarkeit prüfen …','Top-Anbieter sortieren …','Netzwerk spinnen …','Fast fertig …'];
 
 function runLoading() {
-    const fillEl  = document.getElementById('emoji-fill');
-    const pctEl   = document.getElementById('pct-num');
-    const lblEl   = document.getElementById('loading-label');
-    const chips   = document.querySelectorAll('.step-chip');
-    let pct = 0, msgIdx = 0, prevChipIdx = -1;
+    const fill = document.getElementById('emoji-fill');
+    const pctEl = document.getElementById('pct-num');
+    const lbl   = document.getElementById('loading-label');
+    const chips = document.querySelectorAll('.step-chip');
+    let pct = 0, mi = 0;
 
     const iv = setInterval(() => {
-        const step = pct < 60 ? (Math.random()*3+1.2) : pct < 85 ? (Math.random()*2+.6) : (Math.random()*.8+.3);
+        const step = pct < 60 ? Math.random()*3+1.5 : pct < 88 ? Math.random()*1.5+.5 : Math.random()*.6+.2;
         pct = Math.min(100, pct + step);
+        fill.style.height = pct + '%';
+        pctEl.textContent = Math.round(pct);
 
-        fillEl.style.height = pct + '%';
-        pctEl.textContent   = Math.round(pct);
-
-        // Nachrichten
         const ni = Math.min(MSGS.length-1, Math.floor(pct/15));
-        if (ni !== msgIdx) {
-            msgIdx = ni;
-            lblEl.style.opacity = '0';
-            setTimeout(() => { lblEl.textContent = MSGS[ni]; lblEl.style.opacity = '1'; }, 180);
-        }
+        if (ni !== mi) { mi = ni; lbl.style.opacity='0'; setTimeout(()=>{ lbl.textContent=MSGS[ni]; lbl.style.opacity='1'; }, 180); }
 
-        // Step-Chips aufleuchten
-        const ci = Math.min(chips.length-1, Math.floor(pct/(100/chips.length)));
-        if (ci !== prevChipIdx) {
-            prevChipIdx = ci;
-            chips[ci].style.background = 'rgba(245,158,11,.25)';
-            chips[ci].style.color = '#fbbf24';
-            chips[ci].style.borderColor = 'rgba(245,158,11,.4)';
-        }
+        chips.forEach(c => { if (parseInt(c.dataset.thr) <= pct) c.classList.add('done'); });
 
         if (pct >= 100) {
             clearInterval(iv);
             setTimeout(() => {
-                const overlay = document.getElementById('cta-overlay');
-                overlay.style.opacity = '1';
-                overlay.style.pointerEvents = 'auto';
-                document.getElementById('emoji-wrap').classList.add('cta-pulse');
-                lblEl.textContent = '✓ Tippe auf das Emoji, um loszulegen!';
-                lblEl.style.opacity = '1';
+                const ov = document.getElementById('cta-overlay');
+                ov.style.opacity = '1'; ov.style.pointerEvents = 'auto';
+                document.getElementById('emoji-wrap').classList.add('cta-glow');
+                lbl.textContent = '✓ Fertig! Emoji antippen →';
             }, 300);
         }
     }, 45);
@@ -793,14 +663,14 @@ function runLoading() {
 
 function onEmojiClick() {
     if (document.getElementById('cta-overlay').style.opacity !== '1') return;
-    state.contacted = []; state.skipped = []; currentIdx = 0;
+    state.contacted = []; state.budgetUsed = 0; cardIdx = 0;
     show('s-swipe');
     renderCard(0);
 }
 
-/* ═══════════════════════════════════════
-   SCREEN 3 – SWIPE
-═══════════════════════════════════════ */
+/* ═══════════════════════════
+   SCREEN 3
+═══════════════════════════ */
 function renderCard(idx) {
     if (idx >= CATEGORIES.length) { finishSwipe(); return; }
     const cat = CATEGORIES[idx];
@@ -808,102 +678,80 @@ function renderCard(idx) {
     // Dots
     for (let i = 0; i < 6; i++) {
         const d = document.getElementById(`dot-${i}`);
-        d.className = 'w-2.5 h-2.5 rounded-full transition-all duration-300 ' +
-            (i < idx ? 'dot-done' : i === idx ? 'dot-active' : 'dot-inactive');
+        d.className = 'dot' + (i < idx ? ' done' : i === idx ? ' active' : '');
     }
 
-    // Header-Farbe
-    const header = document.getElementById('card-header');
-    header.className = `${cat.css} p-5 pb-4 relative overflow-hidden`;
+    // Header
+    document.getElementById('card-header').className = `${cat.css} shrink-0 relative overflow-hidden`;
+    document.getElementById('card-header').style.cssText = 'padding:20px 20px 18px';
     document.getElementById('card-icon').className = `fa-solid ${cat.icon} text-white text-2xl`;
     document.getElementById('card-title').textContent   = cat.title;
-    document.getElementById('card-counter').textContent = `${idx+1} / ${CATEGORIES.length}`;
+    document.getElementById('card-counter').textContent = `${idx+1} / 6`;
     document.getElementById('card-loc').innerHTML =
-        `<i class="fa-solid fa-location-dot mr-0.5"></i>Top in ${state.loc} & Umgebung`;
+        `<i class="fa-solid fa-location-dot mr-0.5"></i>Top in ${state.loc}`;
 
-    // Provider – py-3.5 für mehr Höhe, kein margin nötig (justify-evenly übernimmt das)
+    // Providers mit Avatar (Emoji + initial)
     document.getElementById('card-providers').innerHTML = cat.providers.map((p,i) => `
-        <div class="flex items-center gap-3 px-3 py-3.5 rounded-2xl provider-row w-full" style="${i===0
-            ? 'background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18)'
-            : 'background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)'}">
-            <div class="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center font-black text-sm shadow-inner ${i===0?cat.css:''}"
-                 style="${i>0?'background:rgba(255,255,255,.08)':''}">
-                <span class="${i===0?'text-white':'text-white/35'} text-sm">${i+1}</span>
+        <div class="flex items-center gap-3.5 px-4 py-4 rounded-2xl ${
+            i===0 ? 'bg-slate-50 border border-slate-200 shadow-sm' : 'bg-white border border-slate-100'
+        }">
+            <!-- Avatar mit Emoji -->
+            <div class="avatar ${i===0?cat.css:''}" style="${i>0?AV_COLORS[i]:''}">
+                <span style="font-size:20px;line-height:1">${p.emoji}</span>
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-black text-white truncate">${p.name}</p>
-                <p class="text-[10px] text-white/45 truncate mt-0.5">${p.desc}</p>
+                <p class="text-sm font-black text-slate-900 truncate">${p.name}</p>
+                <p class="text-[11px] text-slate-400 truncate mt-0.5">${p.desc}</p>
             </div>
             <div class="text-right shrink-0">
-                <p class="text-xs font-black text-amber-400">★ ${p.stars.toFixed(1)}</p>
-                <p class="text-[10px] text-white/40 font-mono mt-0.5">ab ${p.price} €</p>
+                <p class="text-xs font-black text-amber-500">★ ${p.stars.toFixed(1)}</p>
+                <p class="text-[11px] text-slate-400 font-mono mt-0.5">ab ${p.price} €</p>
             </div>
         </div>
     `).join('');
 
     // Karte zurücksetzen
     const card = document.getElementById('active-card');
+    card.style.cssText = '';
     card.classList.remove('fly-right','fly-left','snap-back');
-    card.style.cssText += ';transform:translateX(0) rotate(0deg);opacity:1;transition:none';
     document.getElementById('lbl-right').style.opacity = '0';
     document.getElementById('lbl-left').style.opacity  = '0';
-    updateSwipeCounter();
+    updateSummary();
 }
 
-function updateSwipeCounter() {
+function updateSummary() {
     const n = state.contacted.length;
-    document.getElementById('swipe-summary').textContent =
-        n > 0 ? `${n} Kategorie${n>1?'n':''} angefragt ✓` : '';
+    document.getElementById('swipe-summary').textContent = n > 0 ? `${n} angefragt ✓` : '';
 }
 
-function swipeRight() {
-    state.contacted.push(CATEGORIES[currentIdx]);
-    animateFly('right');
-}
-function swipeLeft() {
-    state.skipped.push(CATEGORIES[currentIdx]);
-    animateFly('left');
-}
-function animateFly(dir) {
-    const card = document.getElementById('active-card');
-    card.classList.add(dir === 'right' ? 'fly-right' : 'fly-left');
-    setTimeout(() => { currentIdx++; renderCard(currentIdx); }, 340);
+function swipeRight() { state.contacted.push(CATEGORIES[cardIdx]); fly('right'); }
+function swipeLeft()  { fly('left'); }
+function fly(dir) {
+    document.getElementById('active-card').classList.add(dir==='right'?'fly-right':'fly-left');
+    setTimeout(() => { cardIdx++; renderCard(cardIdx); }, 330);
 }
 
-/* ── Drag / Touch ── */
+/* ── Drag ── */
 (function() {
     const card = document.getElementById('active-card');
-    let sx = 0, dragging = false, dx = 0;
+    let sx=0, dragging=false, dx=0;
     const THR = 85;
-
-    function start(e) {
-        if (e.target.closest('button')) return;
-        sx = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
-        dragging = true;
-        card.style.transition = 'none';
-    }
-    function move(e) {
-        if (!dragging) return;
-        const cx = e.clientX ?? e.touches?.[0]?.clientX;
-        if (cx == null) return;
+    const start = e => { if(e.target.closest('button'))return; sx=e.clientX??e.touches?.[0]?.clientX??0; dragging=true; card.style.transition='none'; };
+    const move  = e => {
+        if(!dragging) return;
+        const cx = e.clientX ?? e.touches?.[0]?.clientX; if(cx==null) return;
         dx = cx - sx;
-        card.style.transform = `translateX(${dx}px) rotate(${dx*.055}deg)`;
-        document.getElementById('lbl-right').style.opacity = dx > 20 ? Math.min(1,(dx-20)/55) : '0';
-        document.getElementById('lbl-left').style.opacity  = dx <-20 ? Math.min(1,(-dx-20)/55) : '0';
-    }
-    function end() {
-        if (!dragging) return;
-        dragging = false;
-        if      (dx >  THR) swipeRight();
-        else if (dx < -THR) swipeLeft();
-        else {
-            card.classList.add('snap-back');
-            card.style.transform = 'translateX(0) rotate(0deg)';
-            document.getElementById('lbl-right').style.opacity = '0';
-            document.getElementById('lbl-left').style.opacity  = '0';
-        }
-        dx = 0;
-    }
+        card.style.transform = `translateX(${dx}px) rotate(${dx*.05}deg)`;
+        document.getElementById('lbl-right').style.opacity = dx>25 ? Math.min(1,(dx-25)/50) : '0';
+        document.getElementById('lbl-left').style.opacity  = dx<-25 ? Math.min(1,(-dx-25)/50) : '0';
+    };
+    const end = () => {
+        if(!dragging) return; dragging=false;
+        if(dx>THR) swipeRight(); else if(dx<-THR) swipeLeft();
+        else { card.classList.add('snap-back'); card.style.transform='translateX(0) rotate(0)';
+               document.getElementById('lbl-right').style.opacity='0'; document.getElementById('lbl-left').style.opacity='0'; }
+        dx=0;
+    };
     card.addEventListener('mousedown',  start);
     card.addEventListener('touchstart', start, {passive:true});
     document.addEventListener('mousemove',  move);
@@ -912,150 +760,121 @@ function animateFly(dir) {
     document.addEventListener('touchend',   end);
 })();
 
-/* ═══════════════════════════════════════
-   SCREEN 4 – COCKPIT
-═══════════════════════════════════════ */
+/* ═══════════════════════════
+   SCREEN 4
+═══════════════════════════ */
 function finishSwipe() {
     show('s-cockpit');
-
-    // Header
-    document.getElementById('cockpit-name').textContent = state.name;
-    document.getElementById('cockpit-loc').textContent  = state.loc;
+    document.getElementById('cockpit-name').textContent   = state.name;
+    document.getElementById('cockpit-loc').textContent    = state.loc;
     document.getElementById('cockpit-guests').textContent = state.guests + ' Gäste';
     document.getElementById('budget-total-lbl').textContent = state.budget.toLocaleString('de') + ' €';
 
-    // Datum formatieren
     if (state.date) {
-        const d = new Date(state.date);
         document.getElementById('cockpit-date').textContent =
-            d.toLocaleDateString('de-DE', { day:'2-digit', month:'long', year:'numeric' });
+            new Date(state.date).toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
     }
 
-    // Countdown
-    const eventDate = new Date(state.date);
-    const daysLeft  = Math.max(0, Math.round((eventDate - Date.now()) / 864e5));
+    const daysLeft = Math.max(0, Math.round((new Date(state.date) - Date.now()) / 864e5));
     document.getElementById('days-left').textContent = daysLeft;
     document.getElementById('days-bar').style.width  = Math.min(100, daysLeft/180*100) + '%';
 
-    // Kanban befüllen
     buildKanban();
 }
 
 function buildKanban() {
     const col1 = document.getElementById('k-col-1');
     const col2 = document.getElementById('k-col-2');
-    col1.innerHTML = '';
-    let count1 = 0;
+    col1.innerHTML = ''; let count1 = 0;
 
-    state.contacted.forEach((cat, catIdx) => {
-        const p = cat.providers[0]; // Top-Anbieter anfragen
-        state.budgetUsed += p.price;
-        count1++;
-        const delay = catIdx * 80;
+    state.contacted.forEach((cat, ci) => {
+        const p = cat.providers[0];
+        state.budgetUsed += p.price; count1++;
+        const delay = ci * 70;
         col1.insertAdjacentHTML('beforeend', kCard(p, cat, 'sky', 'Angefragt', delay));
     });
 
-    // Demo-Angebot in Spalte 2 (erster kontaktierter Anbieter)
     if (state.contacted.length > 0) {
-        const demoCat = state.contacted[0];
-        const p2 = demoCat.providers[1];
-        col2.innerHTML = kCard(p2, demoCat, 'amber', 'Angebot liegt vor', 0, `${p2.price} € Festpreis`);
+        const dc = state.contacted[0], dp = dc.providers[1];
+        col2.innerHTML = kCard(dp, dc, 'amber', 'Angebot liegt vor', 0, dp.price + ' € Festpreis');
         document.getElementById('k-count-2').textContent = '1';
     } else {
-        col2.innerHTML = '<div class="text-center py-6 rounded-2xl text-[9px] text-white/20" style="border:1px dashed rgba(255,255,255,.1)">Noch leer</div>';
+        col2.innerHTML = '<div class="text-center py-5 rounded-2xl text-[10px] text-slate-300 border border-dashed border-slate-200 bg-white">Noch leer</div>';
     }
 
-    if (count1 === 0) {
-        col1.innerHTML = '<div class="text-center py-6 rounded-2xl text-[9px] text-white/20" style="border:1px dashed rgba(255,255,255,.1)">Nichts angefragt</div>';
-    }
+    if (!count1) col1.innerHTML = '<div class="text-center py-5 rounded-2xl text-[10px] text-slate-300 border border-dashed border-slate-200 bg-white">Nichts angefragt</div>';
     document.getElementById('k-count-1').textContent = count1;
-
-    updateBudgetDisplay();
+    updateBudget();
 }
 
 function kCard(p, cat, color, status, delay, sub) {
-    const colorMap = {
-        sky:    { bg:'rgba(56,189,248,.12)',  border:'rgba(56,189,248,.25)',  text:'#38bdf8'  },
-        amber:  { bg:'rgba(245,158,11,.12)',  border:'rgba(245,158,11,.25)',  text:'#f59e0b'  },
-        emerald:{ bg:'rgba(16,185,129,.12)', border:'rgba(16,185,129,.25)', text:'#10b981' }
+    const colors = {
+        sky:    {bg:'#F0F9FF',border:'#BAE6FD',txt:'#0369a1',badge:'bg-sky-100 text-sky-600'},
+        amber:  {bg:'#FFFBEB',border:'#FDE68A',txt:'#b45309',badge:'bg-amber-100 text-amber-600'},
+        emerald:{bg:'#F0FDF4',border:'#A7F3D0',txt:'#065f46',badge:'bg-emerald-100 text-emerald-600'},
     };
-    const c = colorMap[color];
+    const c = colors[color];
     return `
-        <div class="rounded-2xl p-3 card-in" style="background:${c.bg};border:1px solid ${c.border};animation-delay:${delay}ms">
+        <div class="rounded-2xl p-3 card-in" style="background:${c.bg};border:1.5px solid ${c.border};animation-delay:${delay}ms">
             <div class="flex items-center gap-2 mb-1.5">
-                <div class="${cat.css} w-6 h-6 rounded-lg shrink-0 flex items-center justify-center">
-                    <i class="fa-solid ${cat.icon} text-white text-[9px]"></i>
-                </div>
-                <p class="text-[10px] font-black text-white truncate flex-1">${p.name}</p>
+                <div class="avatar-sm ${cat.css}"><span style="font-size:13px">${p.emoji}</span></div>
+                <p class="text-xs font-black text-slate-800 truncate flex-1">${p.name}</p>
             </div>
-            <p class="text-[9px] text-white/40">${sub || cat.title}</p>
-            <div class="flex items-center justify-between mt-2 pt-1.5" style="border-top:1px solid rgba(255,255,255,.06)">
-                <span class="text-[8px] font-bold" style="color:${c.text}">${status}</span>
-                <span class="text-[9px] font-mono text-white/50">${p.price} €</span>
+            <p class="text-[9px] text-slate-400">${sub || cat.title}</p>
+            <div class="flex items-center justify-between mt-2 pt-1.5 border-t border-black/5">
+                <span class="text-[8px] font-black ${c.badge} px-1.5 py-0.5 rounded-full">${status}</span>
+                <span class="text-[9px] font-mono text-slate-500">${p.price} €</span>
             </div>
         </div>
     `;
 }
 
-function updateBudgetDisplay() {
-    const used  = state.budgetUsed;
-    const total = state.budget;
-    const pct   = total > 0 ? Math.min(100, Math.round(used/total*100)) : 0;
-
-    document.getElementById('cockpit-used-lbl').textContent  = used.toLocaleString('de') + ' € vergeben';
-    document.getElementById('cockpit-budget').textContent    = total.toLocaleString('de') + ' €';
-    document.getElementById('budget-pct-lbl').textContent    = pct + ' % vergeben';
+function updateBudget() {
+    const used = state.budgetUsed, total = state.budget;
+    const pct  = total > 0 ? Math.min(100, Math.round(used/total*100)) : 0;
+    document.getElementById('cockpit-used-lbl').textContent = used.toLocaleString('de') + ' € vergeben';
+    document.getElementById('budget-pct-lbl').textContent   = pct + ' % vergeben';
     document.getElementById('budget-prog').style.width = pct + '%';
     document.getElementById('budget-prog').style.background =
         pct > 80 ? 'linear-gradient(90deg,#ef4444,#f97316)' : 'linear-gradient(90deg,#f59e0b,#f97316)';
 }
 
-/* ═══════════════════════════════════════
+/* ═══════════════════════════
    UTILS
-═══════════════════════════════════════ */
+═══════════════════════════ */
 function show(id) {
     ['s-input','s-loading','s-swipe','s-cockpit'].forEach(s =>
         document.getElementById(s).classList.toggle('hidden', s !== id));
 }
 
-function showToast(msg) {
-    const t = document.createElement('div');
-    t.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl text-xs font-bold text-white shadow-2xl';
-    t.style.cssText = 'background:rgba(239,68,68,.9);backdrop-filter:blur(12px);white-space:nowrap';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2800);
+function showToast() {
+    const t = document.getElementById('toast');
+    t.style.opacity = '1';
+    setTimeout(() => t.style.opacity = '0', 2500);
 }
 
 function resetAll() {
-    state = { name:'', type:'', date:'', loc:'', guests:120, budget:0, contacted:[], skipped:[], budgetUsed:0 };
-    currentIdx = 0;
-
+    state = { name:'', type:'', date:'', loc:'', guests:120, budget:0, contacted:[], budgetUsed:0 };
+    cardIdx = 0;
     document.getElementById('btn-reset').classList.add('hidden');
-    ['i-name','i-loc','i-budget'].forEach(id => document.getElementById(id).value = '');
+    ['i-name','i-loc','i-budget'].forEach(id => document.getElementById(id).value='');
     document.getElementById('i-guests').value = 120;
     document.getElementById('guest-lbl').textContent = '120 Personen';
-    document.getElementById('i-date').value =
-        new Date(Date.now() + 120*24*60*60*1000).toISOString().split('T')[0];
+    document.getElementById('i-date').value = new Date(Date.now()+120*24*60*60*1000).toISOString().split('T')[0];
     document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
 
-    // Loading reset
     document.getElementById('emoji-fill').style.height = '0%';
     document.getElementById('pct-num').textContent = '0';
     document.getElementById('cta-overlay').style.opacity = '0';
     document.getElementById('cta-overlay').style.pointerEvents = 'none';
-    document.getElementById('emoji-wrap').classList.remove('cta-pulse');
-    document.querySelectorAll('.step-chip').forEach(c => {
-        c.style.background = ''; c.style.color = ''; c.style.borderColor = '';
-    });
+    document.getElementById('emoji-wrap').classList.remove('cta-glow');
+    document.querySelectorAll('.step-chip').forEach(c => c.classList.remove('done'));
 
-    // Kanban reset
     ['k-col-1','k-col-2','k-col-3'].forEach((id,i) => {
         document.getElementById(id).innerHTML =
-            `<div class="text-center py-6 rounded-2xl text-[9px] text-white/20" style="border:1px dashed rgba(255,255,255,.1)">Noch leer</div>`;
+            `<div class="text-center py-5 rounded-2xl text-[10px] text-slate-300 border border-dashed border-slate-200 bg-white">Noch leer</div>`;
         document.getElementById(`k-count-${i+1}`).textContent = '0';
     });
-
     show('s-input');
 }
 </script>
