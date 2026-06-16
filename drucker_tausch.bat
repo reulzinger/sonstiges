@@ -30,6 +30,9 @@ if "%ALTER_DRUCKER%"=="HIER_ALTEN_DRUCKERNAMEN_EINTRAGEN" (
     echo FEHLER: Bitte zuerst die Druckernamen im Skript eintragen^^!
     echo Oeffne die .bat-Datei mit einem Texteditor und passe die
     echo ersten drei Variablen an.
+    echo.
+    echo Tipp: Alle installierten Drucker anzeigen mit:
+    echo   powershell -Command "Get-Printer | Select-Object Name | Format-Table"
     pause
     exit /b 1
 )
@@ -90,8 +93,17 @@ echo      OK - IT-Skript abgeschlossen.
 echo.
 echo [3/3] Stelle Fach 2 am neuen Drucker ein: %NEUER_DRUCKER%
 
-:: Kurz warten, falls der Drucker noch registriert wird
+:: Warten bis lokaler Drucker vollstaendig registriert ist
+echo      Warte auf Treiberinstallation (max. 30 Sekunden)...
+set /a WARTE=0
+:WARTE_SCHLEIFE
+powershell -NoProfile -Command "if (Get-Printer -Name '%NEUER_DRUCKER%' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >nul 2>&1
+if %errorLevel% equ 0 goto DRUCKER_BEREIT
 timeout /t 5 /nobreak >nul
+set /a WARTE+=5
+if %WARTE% lss 30 goto WARTE_SCHLEIFE
+echo      HINWEIS: Drucker noch nicht sichtbar - versuche trotzdem zu konfigurieren.
+:DRUCKER_BEREIT
 
 powershell -NoProfile -Command ^
     "Set-PrintConfiguration -PrinterName '%NEUER_DRUCKER%' -PaperSource Lower" ^
