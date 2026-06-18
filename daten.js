@@ -58,3 +58,25 @@ window.STOERUNGEN = [
 
 /* E-Mail-Adresse des Admins, an die Meldungen aus dem Formular gehen */
 window.ADMIN_EMAIL = "reulzinger@googlemail.com";
+
+/* =========================================================================
+   TOOLS / SCHNELLHILFEN
+   Verlinkte Helfer (z. B. .bat-Skripte auf einem Netzlaufwerk).
+   Felder pro Tool:
+     name        : Beschriftung des Buttons
+     pfad        : UNC-/Dateipfad, z. B. "\\\\server\\share\\fix.bat"
+     beschreibung: wann/wofür einsetzen
+   ========================================================================= */
+window.TOOLS = [
+  {
+    name: "Drucker-Spooler neu starten",
+    pfad: "\\\\server\\tools\\spooler-fix.bat",
+    beschreibung: "Wenn Druckaufträge hängen bleiben und nichts mehr gedruckt wird."
+  },
+  {
+    name: "Netzlaufwerke neu verbinden",
+    pfad: "\\\\server\\tools\\netzlaufwerke-reconnect.bat",
+    beschreibung: "Wenn Laufwerk K:/L: mit rotem X angezeigt wird und nicht erreichbar ist."
+  }
+];
+

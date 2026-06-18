@@ -80,6 +80,18 @@
 
   .empty{text-align:center;color:var(--muted);padding:40px;background:#fff;border:1px dashed var(--line);border-radius:12px}
 
+  .section-title{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800;margin:34px 0 14px;color:var(--ink)}
+  .section-title .line{flex:1;height:1px;background:var(--line)}
+  .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .tool{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-3d);padding:16px 18px;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+  .tool:hover{transform:translateY(-4px);box-shadow:0 18px 38px rgba(16,24,40,.16),0 6px 12px rgba(16,24,40,.08)}
+  .tool h4{margin:0 0 4px;font-size:16px;display:flex;align-items:center;gap:7px}
+  .tool p{margin:0 0 12px;font-size:13px;color:var(--muted);flex:1}
+  .tool .pfad{font-family:Consolas,monospace;font-size:11px;color:var(--muted);background:#f1f5f9;border-radius:6px;padding:4px 7px;margin-bottom:10px;word-break:break-all}
+  .tool .tool-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .tool a.run{display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+  .copyflash{font-size:12px;color:var(--behoben);font-weight:700;margin-left:4px;align-self:center}
+
   dialog{border:0;border-radius:14px;padding:0;max-width:560px;width:92%;box-shadow:0 20px 50px rgba(16,24,40,.25)}
   dialog::backdrop{background:rgba(16,24,40,.45)}
   .modal-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
@@ -114,6 +126,8 @@
   </div>
 
   <div id="liste"></div>
+
+  <div id="toolsBereich"></div>
 </main>
 
 <footer>
@@ -317,7 +331,39 @@
     this.reset();
   });
 
+  // ---- Tools / Schnellhilfen ----
+  function renderTools(){
+    var el = document.getElementById("toolsBereich");
+    var tools = window.TOOLS || [];
+    if(!tools.length){ el.innerHTML=""; return; }
+    el.innerHTML =
+      '<div class="section-title">🧰 Schnellhilfen &amp; Tools<span class="line"></span></div>'+
+      '<div class="tools-grid">'+ tools.map(function(t){
+        var pfad = esc(t.pfad||"");
+        return '<div class="tool">'+
+          '<h4>🔧 '+esc(t.name||"Tool")+'</h4>'+
+          (t.beschreibung?'<p>'+esc(t.beschreibung)+'</p>':'<p></p>')+
+          (t.pfad?'<div class="pfad" title="'+pfad+'">'+pfad+'</div>':'')+
+          '<div class="tool-actions">'+
+            '<a class="btn btn-primary run" href="file:///'+encodeURI((t.pfad||"").replace(/\\/g,"/"))+'">▶ Starten</a>'+
+            '<button class="btn btn-ghost copyBtn" data-pfad="'+pfad+'">📋 Pfad kopieren</button>'+
+            '<span class="copyflash"></span>'+
+          '</div>'+
+        '</div>';
+      }).join("") +'</div>';
+  }
+
+  document.getElementById("toolsBereich").addEventListener("click", function(e){
+    var b = e.target.closest(".copyBtn"); if(!b) return;
+    var pfad = b.getAttribute("data-pfad");
+    var flash = b.parentNode.querySelector(".copyflash");
+    function done(){ if(flash){ flash.textContent="✓ kopiert"; setTimeout(function(){flash.textContent="";},2000); } }
+    if(navigator.clipboard){ navigator.clipboard.writeText(pfad).then(done,done); }
+    else { var ta=document.createElement("textarea"); ta.value=pfad; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");}catch(e){} ta.remove(); done(); }
+  });
+
   render();
+  renderTools();
 })();
 </script>
 </body>
