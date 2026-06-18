@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Störungsmelder – Aktuelle Meldungen</title>
+<style>
+  :root{
+    --bg:#f4f6fa; --card:#ffffff; --ink:#1f2733; --muted:#5b6675;
+    --line:#e3e8f0; --brand:#1d4ed8; --brand-dark:#1e3a8a;
+    --stoerung:#dc2626; --stoerung-bg:#fef2f2;
+    --wartung:#d97706; --wartung-bg:#fffbeb;
+    --info:#2563eb; --info-bg:#eff6ff;
+    --behoben:#16a34a; --behoben-bg:#f0fdf4;
+    --shadow:0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.04);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  header{background:linear-gradient(135deg,var(--brand-dark),var(--brand));color:#fff;padding:22px 0}
+  .wrap{max-width:980px;margin:0 auto;padding:0 20px}
+  header h1{margin:0;font-size:24px;letter-spacing:.2px}
+  header p{margin:4px 0 0;opacity:.85;font-size:14px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 14px}
+  .toolbar .filters{display:flex;flex-wrap:wrap;gap:8px;flex:1}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer;color:var(--muted);transition:.15s}
+  .chip:hover{border-color:var(--brand)}
+  .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn{border:0;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer}
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-primary:hover{background:var(--brand-dark)}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  input,select,textarea{font-family:inherit;font-size:14px;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  textarea{min-height:90px;resize:vertical}
+  label{display:block;font-size:13px;font-weight:600;margin:0 0 5px;color:var(--muted)}
+  .field{margin-bottom:14px}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .row .field{flex:1;min-width:180px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-left-width:5px;border-radius:12px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:14px}
+  .card.stoerung{border-left-color:var(--stoerung);background:var(--stoerung-bg)}
+  .card.wartung{border-left-color:var(--wartung);background:var(--wartung-bg)}
+  .card.info{border-left-color:var(--info);background:var(--info-bg)}
+  .card.behoben{border-left-color:var(--behoben);background:var(--behoben-bg)}
+  .card .head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .card h3{margin:0 0 2px;font-size:17px}
+  .badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:4px 9px;border-radius:6px;white-space:nowrap}
+  .badge.stoerung{background:var(--stoerung);color:#fff}
+  .badge.wartung{background:var(--wartung);color:#fff}
+  .badge.info{background:var(--info);color:#fff}
+  .badge.behoben{background:var(--behoben);color:#fff}
+  .meta{font-size:13px;color:var(--muted);margin:6px 0}
+  .meta b{color:var(--ink)}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+  .tag{font-size:12px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 8px;color:var(--muted)}
+  .desc{margin:8px 0 0;font-size:14px}
+  .updates{margin:12px 0 0;border-top:1px dashed var(--line);padding-top:10px}
+  .updates summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--brand)}
+  .update{font-size:13px;color:var(--muted);margin-top:6px;padding-left:12px;border-left:2px solid var(--line)}
+  .update b{color:var(--ink)}
+
+  .empty{text-align:center;color:var(--muted);padding:40px;background:#fff;border:1px dashed var(--line);border-radius:12px}
+
+  dialog{border:0;border-radius:14px;padding:0;max-width:560px;width:92%;box-shadow:0 20px 50px rgba(16,24,40,.25)}
+  dialog::backdrop{background:rgba(16,24,40,.45)}
+  .modal-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .modal-head h2{margin:0;font-size:18px}
+  .modal-body{padding:18px 22px;max-height:70vh;overflow:auto}
+  .modal-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+  .x{background:none;border:0;font-size:22px;cursor:pointer;color:var(--muted)}
+  .hint{font-size:13px;color:var(--muted);background:var(--info-bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:16px}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:30px 0}
+  @media(max-width:560px){.toolbar{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>🛠️ Störungsmelder</h1>
+    <p>Aktuelle Störungen, Wartungen &amp; Hinweise der IT</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="toolbar">
+    <div class="filters" id="filters">
+      <button class="chip active" data-typ="alle">Alle</button>
+      <button class="chip" data-typ="stoerung">Störungen</button>
+      <button class="chip" data-typ="wartung">Wartungen</button>
+      <button class="chip" data-typ="info">Hinweise</button>
+      <button class="chip" data-typ="behoben">Behoben</button>
+    </div>
+    <button class="btn btn-primary" id="meldenBtn">+ Störung melden</button>
+  </div>
+
+  <div id="liste"></div>
+</main>
+
+<footer>
+  Interne IT-Statusseite · Stand wird vom Admin gepflegt ·
+  <span id="count"></span>
+</footer>
+
+<!-- Melde-Dialog -->
+<dialog id="dlg">
+  <form id="meldeForm" method="dialog">
+    <div class="modal-head">
+      <h2>Störung / Hinweis melden</h2>
+      <button type="button" class="x" id="closeDlg" aria-label="Schließen">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="hint">
+        Deine Meldung wird als fertige <b>Outlook-Mail</b> an den Admin erzeugt.
+        Bitte nur noch in Outlook auf <b>Senden</b> klicken.
+      </div>
+      <div class="field">
+        <label>Art der Meldung</label>
+        <select id="f_typ">
+          <option value="stoerung">Störung (etwas funktioniert nicht)</option>
+          <option value="wartung">Geplante Wartung</option>
+          <option value="info">Hinweis / Information</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Kurztitel *</label>
+        <input id="f_titel" placeholder="z. B. Drucker im 2. OG ohne Funktion" required>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Betroffenes System</label>
+          <input id="f_system" placeholder="z. B. Fachverfahren XYZ">
+        </div>
+        <div class="field">
+          <label>Standort / Bereich</label>
+          <input id="f_standort" placeholder="z. B. Standort Mitte">
+        </div>
+      </div>
+      <div class="field">
+        <label>Beschreibung *</label>
+        <textarea id="f_text" placeholder="Was genau funktioniert nicht? Seit wann? Wer ist betroffen?" required></textarea>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Dein Name</label>
+          <input id="f_name" placeholder="Vor- und Nachname">
+        </div>
+        <div class="field">
+          <label>Rückruf / Durchwahl</label>
+          <input id="f_tel" placeholder="z. B. -1234">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" id="cancelDlg">Abbrechen</button>
+      <button type="submit" class="btn btn-primary">✉️ Outlook-Mail erzeugen</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Daten -->
+<script src="daten.js"></script>
+<script>
+(function(){
+  var DATA = window.STOERUNGEN || [];
+  var ADMIN = window.ADMIN_EMAIL || "";
+  var aktivFilter = "alle";
+
+  var TYP_LABEL = {stoerung:"Störung", wartung:"Wartung", info:"Hinweis", behoben:"Behoben"};
+
+  function esc(s){return (s||"").replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+
+  function laeuft(m){
+    return (m.typ==="stoerung") ? "" : "";
+  }
+
+  function render(){
+    var liste = document.getElementById("liste");
+    var items = DATA.slice().sort(function(a,b){return (b.id||0)-(a.id||0);});
+    if(aktivFilter!=="alle") items = items.filter(function(m){return m.typ===aktivFilter;});
+
+    if(!items.length){
+      liste.innerHTML = '<div class="empty">Keine Meldungen in dieser Kategorie. 🎉<br>Alle Systeme laufen.</div>';
+    } else {
+      liste.innerHTML = items.map(card).join("");
+    }
+    document.getElementById("count").textContent = DATA.length + " Meldung(en) gesamt";
+  }
+
+  function card(m){
+    var t = m.typ || "info";
+    var tags = "";
+    if(m.system)   tags += '<span class="tag">🖥️ '+esc(m.system)+'</span>';
+    if(m.standort) tags += '<span class="tag">📍 '+esc(m.standort)+'</span>';
+
+    var zeit = "";
+    if(m.beginn) zeit += '<b>Beginn:</b> '+esc(m.beginn);
+    if(m.ende)   zeit += (zeit?' &nbsp;·&nbsp; ':'')+'<b>Voraussichtl. Ende:</b> '+esc(m.ende);
+
+    var upd = "";
+    if(m.updates && m.updates.length){
+      upd = '<details class="updates"><summary>Verlauf ('+m.updates.length+')</summary>'+
+        m.updates.map(function(u){
+          return '<div class="update"><b>'+esc(u.zeit)+'</b> – '+esc(u.text)+'</div>';
+        }).join("")+'</details>';
+    }
+
+    return '<article class="card '+t+'">'+
+      '<div class="head">'+
+        '<h3>'+esc(m.titel)+'</h3>'+
+        '<span class="badge '+t+'">'+(TYP_LABEL[t]||t)+'</span>'+
+      '</div>'+
+      (tags?'<div class="tags">'+tags+'</div>':'')+
+      (zeit?'<div class="meta">'+zeit+'</div>':'')+
+      '<p class="desc">'+esc(m.text).replace(/\n/g,"<br>")+'</p>'+
+      upd+
+    '</article>';
+  }
+
+  // Filter
+  document.getElementById("filters").addEventListener("click",function(e){
+    var b = e.target.closest(".chip"); if(!b) return;
+    aktivFilter = b.dataset.typ;
+    [].forEach.call(this.querySelectorAll(".chip"),function(c){c.classList.toggle("active",c===b);});
+    render();
+  });
+
+  // Dialog
+  var dlg = document.getElementById("dlg");
+  document.getElementById("meldenBtn").addEventListener("click",function(){dlg.showModal();});
+  document.getElementById("closeDlg").addEventListener("click",function(){dlg.close();});
+  document.getElementById("cancelDlg").addEventListener("click",function(){dlg.close();});
+
+  document.getElementById("meldeForm").addEventListener("submit",function(e){
+    e.preventDefault();
+    var typ = document.getElementById("f_typ").value;
+    var titel = document.getElementById("f_titel").value.trim();
+    var sys = document.getElementById("f_system").value.trim();
+    var ort = document.getElementById("f_standort").value.trim();
+    var text = document.getElementById("f_text").value.trim();
+    var name = document.getElementById("f_name").value.trim();
+    var tel = document.getElementById("f_tel").value.trim();
+    if(!titel || !text) return;
+
+    var betreff = "[Störungsmelder] "+(TYP_LABEL[typ]||typ)+": "+titel;
+    var body =
+      "Neue Meldung über den Störungsmelder\n"+
+      "----------------------------------------\n"+
+      "Art:        "+(TYP_LABEL[typ]||typ)+"\n"+
+      "Titel:      "+titel+"\n"+
+      "System:     "+(sys||"-")+"\n"+
+      "Standort:   "+(ort||"-")+"\n"+
+      "Gemeldet:   "+new Date().toLocaleString("de-DE")+"\n"+
+      "Von:        "+(name||"-")+(tel?(" ("+tel+")"):"")+"\n"+
+      "----------------------------------------\n\n"+
+      text+"\n";
+
+    var href = "mailto:"+encodeURIComponent(ADMIN)+
+      "?subject="+encodeURIComponent(betreff)+
+      "&body="+encodeURIComponent(body);
+    window.location.href = href;
+    dlg.close();
+    this.reset();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
