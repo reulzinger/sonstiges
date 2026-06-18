@@ -109,7 +109,8 @@
     </div>
     <div class="modal-body">
       <div class="hint">
-        Deine Meldung wird als fertige <b>Outlook-Mail</b> an den Admin erzeugt.
+        Deine Meldung wird als fertige <b>Outlook-Mail</b> an den Admin erzeugt
+        (inkl. fertigem Code-Block zum Einfügen).
         Bitte nur noch in Outlook auf <b>Senden</b> klicken.
       </div>
       <div class="field">
@@ -168,6 +169,10 @@
 
   function esc(s){return (s||"").replace(/[&<>"]/g,function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+
+  // String für die Einbettung in JS-Quelltext absichern (Anführungszeichen/Umbrüche)
+  function js(s){return String(s||"")
+    .replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\r?\n/g,"\\n");}
 
   function laeuft(m){
     return (m.typ==="stoerung") ? "" : "";
@@ -241,18 +246,35 @@
     var tel = document.getElementById("f_tel").value.trim();
     if(!titel || !text) return;
 
+    var jetzt = new Date();
+    var id = Math.floor(jetzt.getTime()/1000); // eindeutig, neueste oben
+    var zeitStr = jetzt.toLocaleString("de-DE");
+
+    // Fertiger Code-Block für daten.js – Admin fügt ihn nur oben in die Liste ein
+    var codeBlock =
+      "  {\n"+
+      "    id: "+id+",\n"+
+      "    typ: \""+typ+"\",\n"+
+      "    titel: \""+js(titel)+"\",\n"+
+      "    system: \""+js(sys)+"\",\n"+
+      "    standort: \""+js(ort)+"\",\n"+
+      "    beginn: \"\",\n"+
+      "    ende: \"\",\n"+
+      "    text: \""+js(text)+"\",\n"+
+      "    updates: [\n"+
+      "      { zeit: \""+js(zeitStr)+"\", text: \"Gemeldet von "+js(name||"-")+(tel?(" ("+js(tel)+")"):"")+"\" }\n"+
+      "    ]\n"+
+      "  },";
+
     var betreff = "[Störungsmelder] "+(TYP_LABEL[typ]||typ)+": "+titel;
     var body =
       "Neue Meldung über den Störungsmelder\n"+
-      "----------------------------------------\n"+
-      "Art:        "+(TYP_LABEL[typ]||typ)+"\n"+
-      "Titel:      "+titel+"\n"+
-      "System:     "+(sys||"-")+"\n"+
-      "Standort:   "+(ort||"-")+"\n"+
-      "Gemeldet:   "+new Date().toLocaleString("de-DE")+"\n"+
-      "Von:        "+(name||"-")+(tel?(" ("+tel+")"):"")+"\n"+
-      "----------------------------------------\n\n"+
-      text+"\n";
+      "Gemeldet: "+zeitStr+" von "+(name||"-")+(tel?(" ("+tel+")"):"")+"\n\n"+
+      "============================================================\n"+
+      "ANLEITUNG: Den folgenden Block oben in die Liste in daten.js\n"+
+      "einfügen (direkt nach 'window.STOERUNGEN = [') und speichern.\n"+
+      "============================================================\n\n"+
+      codeBlock+"\n";
 
     var href = "mailto:"+encodeURIComponent(ADMIN)+
       "?subject="+encodeURIComponent(betreff)+
