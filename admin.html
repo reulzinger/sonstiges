@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Störungsmelder – Admin</title>
+<style>
+  :root{
+    --bg:#f4f6fa; --card:#ffffff; --ink:#1f2733; --muted:#5b6675;
+    --line:#e3e8f0; --brand:#1d4ed8; --brand-dark:#1e3a8a;
+    --stoerung:#dc2626; --wartung:#d97706; --info:#2563eb; --behoben:#16a34a;
+    --shadow:0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.04);
+    --shadow-3d:0 10px 25px rgba(16,24,40,.10),0 4px 8px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,Arial,sans-serif;
+    background:radial-gradient(1200px 500px at 50% -200px,#e7edff 0%,var(--bg) 60%);
+    color:var(--ink);line-height:1.5;min-height:100vh}
+  header{position:relative;text-align:center;color:#fff;padding:30px 0 28px;
+    background:linear-gradient(135deg,#16307a 0%,var(--brand) 55%,#3b82f6 100%);
+    box-shadow:0 12px 30px rgba(29,78,216,.30);overflow:hidden}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;
+    background:linear-gradient(90deg,var(--stoerung),var(--wartung),var(--behoben),var(--info))}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+  .logo{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;
+    border-radius:16px;font-size:30px;margin-bottom:10px;
+    background:linear-gradient(160deg,#ffffff22,#ffffff05);
+    border:1px solid #ffffff40;box-shadow:0 8px 20px rgba(0,0,0,.25),inset 0 1px 1px #ffffff66}
+  header h1{margin:0;font-size:26px;font-weight:800;text-shadow:0 2px 6px rgba(0,0,0,.35)}
+  header p{margin:6px 0 0;opacity:.95;font-size:15px}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 16px}
+  .toolbar .spacer{flex:1}
+  .btn{border:0;border-radius:10px;padding:11px 16px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .12s,box-shadow .12s}
+  .btn-primary{background:linear-gradient(160deg,#3b82f6,var(--brand));color:#fff;box-shadow:0 8px 18px rgba(29,78,216,.40),inset 0 1px 0 #ffffff55}
+  .btn-primary:hover{transform:translateY(-2px)}
+  .btn-ok{background:linear-gradient(160deg,#22c55e,#15803d);color:#fff;box-shadow:0 8px 18px rgba(21,128,61,.35)}
+  .btn-ok:hover{transform:translateY(-2px)}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink);box-shadow:var(--shadow)}
+  .btn-ghost:hover{transform:translateY(-1px)}
+  .btn-sm{padding:6px 11px;font-size:13px;border-radius:8px}
+  .btn-danger{background:#fff;border:1px solid #fecaca;color:var(--stoerung)}
+  .btn-danger:hover{background:#fef2f2}
+
+  input,select,textarea{font-family:inherit;font-size:14px;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  textarea{min-height:90px;resize:vertical}
+  label{display:block;font-size:13px;font-weight:600;margin:0 0 5px;color:var(--muted)}
+  .field{margin-bottom:14px}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .row .field{flex:1;min-width:170px}
+
+  .item{background:#fff;border:1px solid var(--line);border-left-width:6px;border-radius:12px;
+    box-shadow:var(--shadow-3d);padding:14px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:center}
+  .item.stoerung{border-left-color:var(--stoerung)}
+  .item.wartung{border-left-color:var(--wartung)}
+  .item.info{border-left-color:var(--info)}
+  .item.behoben{border-left-color:var(--behoben)}
+  .item .info-col{flex:1;min-width:0}
+  .item h3{margin:0 0 2px;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .sub{font-size:12px;color:var(--muted)}
+  .badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:3px 8px;border-radius:6px;color:#fff;white-space:nowrap}
+  .badge.stoerung{background:var(--stoerung)} .badge.wartung{background:var(--wartung)}
+  .badge.info{background:var(--info)} .badge.behoben{background:var(--behoben)}
+  .actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .empty{text-align:center;color:var(--muted);padding:36px;background:#fff;border:1px dashed var(--line);border-radius:12px}
+
+  dialog{border:0;border-radius:14px;padding:0;max-width:600px;width:94%;box-shadow:0 20px 50px rgba(16,24,40,.25)}
+  dialog::backdrop{background:rgba(16,24,40,.45)}
+  .modal-head{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .modal-head h2{margin:0;font-size:18px}
+  .modal-body{padding:18px 22px;max-height:72vh;overflow:auto}
+  .modal-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+  .x{background:none;border:0;font-size:22px;cursor:pointer;color:var(--muted)}
+
+  .upd-row{display:flex;gap:8px;margin-bottom:8px}
+  .upd-row input:first-child{max-width:170px}
+  .card-box{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;margin-bottom:16px}
+  .card-box h2{margin:0 0 10px;font-size:16px}
+  #out{width:100%;min-height:320px;font-family:Consolas,"Courier New",monospace;font-size:12.5px;white-space:pre;background:#0f172a;color:#e2e8f0;border:0;border-radius:10px;padding:14px}
+  .hint{font-size:13px;color:var(--muted);background:#eff6ff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:14px}
+  .ok-flash{color:var(--behoben);font-weight:700;font-size:13px;margin-left:10px}
+  footer{color:var(--muted);font-size:12px;text-align:center;padding:30px 0}
+  details.import summary{cursor:pointer;font-weight:600;color:var(--brand)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="logo">🛠️</div>
+    <h1>Störungsmelder &middot; Admin</h1>
+    <p>Meldungen bearbeiten und neue <b>daten.js</b> erzeugen</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="toolbar">
+    <button class="btn btn-primary" id="neuBtn">+ Neue Meldung</button>
+    <button class="btn btn-ghost" id="settingsBtn">⚙️ Einstellungen</button>
+    <span class="spacer"></span>
+    <button class="btn btn-ok" id="genBtn">📄 daten.js erzeugen</button>
+  </div>
+
+  <div id="liste"></div>
+
+  <details class="import card-box">
+    <summary>Bestehende daten.js importieren (optional)</summary>
+    <p class="hint" style="margin-top:12px">Falls du schon eine <b>daten.js</b> mit Inhalten hast, kopiere ihren kompletten Inhalt hier rein und klicke „Importieren“. Achtung: ersetzt die aktuelle Liste.</p>
+    <textarea id="importText" placeholder="Inhalt der bestehenden daten.js hier einfügen ..."></textarea>
+    <div style="margin-top:10px"><button class="btn btn-ghost" id="importBtn">Importieren</button></div>
+  </details>
+</main>
+
+<footer>2026 &copy; Sascha Reul – Systembetreuer aus Leidenschaft ;-)</footer>
+
+<!-- Editor -->
+<dialog id="dlg">
+  <form id="form" method="dialog">
+    <div class="modal-head">
+      <h2 id="dlgTitel">Meldung bearbeiten</h2>
+      <button type="button" class="x" data-close>&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="f_id">
+      <div class="field">
+        <label>Art der Meldung</label>
+        <select id="f_typ">
+          <option value="stoerung">Störung</option>
+          <option value="wartung">Wartung</option>
+          <option value="info">Hinweis / Information</option>
+          <option value="behoben">Behoben</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Titel *</label>
+        <input id="f_titel" placeholder="z. B. Fachverfahren XYZ nicht erreichbar" required>
+      </div>
+      <div class="row">
+        <div class="field"><label>Betroffenes System</label><input id="f_system" placeholder="z. B. Fachverfahren XYZ"></div>
+        <div class="field"><label>Standort / Bereich</label><input id="f_standort" placeholder="z. B. Alle"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Beginn</label><input id="f_beginn" placeholder="z. B. 20.06.2026 18:00"></div>
+        <div class="field"><label>Voraussichtl. Ende</label><input id="f_ende" placeholder="z. B. 20.06.2026 22:00"></div>
+      </div>
+      <div class="field">
+        <label>Beschreibung *</label>
+        <textarea id="f_text" placeholder="Ausführliche Beschreibung ..." required></textarea>
+      </div>
+      <div class="field">
+        <label>Verlauf / Updates</label>
+        <div id="updList"></div>
+        <button type="button" class="btn btn-ghost btn-sm" id="addUpd">+ Verlaufseintrag</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-close>Abbrechen</button>
+      <button type="submit" class="btn btn-primary">Speichern</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Einstellungen -->
+<dialog id="dlgSet">
+  <form method="dialog">
+    <div class="modal-head"><h2>Einstellungen</h2><button type="button" class="x" data-close>&times;</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Admin-E-Mail (Empfänger der Melde-Formulare)</label>
+        <input id="f_email" placeholder="admin@behoerde.de">
+      </div>
+      <p class="hint">Diese Adresse wird mit in die daten.js geschrieben und ist das Ziel des „Störung melden“-Buttons auf der Anwenderseite.</p>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-close>Schließen</button>
+      <button type="button" class="btn btn-primary" id="saveSet">Übernehmen</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Ausgabe -->
+<dialog id="dlgOut">
+  <div class="modal-head">
+    <h2>Neue daten.js <span id="flash" class="ok-flash"></span></h2>
+    <button type="button" class="x" data-close>&times;</button>
+  </div>
+  <div class="modal-body">
+    <div class="hint"><b>So geht's:</b> Klick auf <b>„Alles markieren &amp; kopieren“</b> (oder ins Feld klicken &rarr; STRG+A &rarr; STRG+C). Dann <b>daten.js</b> öffnen, kompletten Inhalt ersetzen (STRG+A &rarr; einfügen) und speichern.</div>
+    <textarea id="out" readonly spellcheck="false"></textarea>
+  </div>
+  <div class="modal-foot">
+    <button type="button" class="btn btn-ghost" data-close>Schließen</button>
+    <button type="button" class="btn btn-ok" id="copyBtn">📋 Alles markieren &amp; kopieren</button>
+  </div>
+</dialog>
+
+<script>
+(function(){
+  var KEY = "stoerungsmelder_admin_v1";
+  var TYP_LABEL = {stoerung:"Störung", wartung:"Wartung", info:"Hinweis", behoben:"Behoben"};
+
+  // ---- State (mit Beispielinhalt beim ersten Start) ----
+  var state = load() || {
+    email: "reulzinger@googlemail.com",
+    entries: [
+      { id: 3, typ:"stoerung", titel:"Fachverfahren XYZ nicht erreichbar", system:"Fachverfahren XYZ",
+        standort:"Alle", beginn:"18.06.2026 07:40", ende:"",
+        text:"Aufgrund einer Störung ist das Fachverfahren XYZ derzeit nicht erreichbar. An einer Lösung wird gearbeitet.",
+        updates:[{zeit:"18.06.2026 08:10",text:"Ursache eingegrenzt, Dienstleister informiert."},{zeit:"18.06.2026 07:40",text:"Störung festgestellt."}] },
+      { id: 2, typ:"wartung", titel:"Wartungsfenster Druckserver", system:"Zentraler Druckserver",
+        standort:"Standort Mitte", beginn:"20.06.2026 18:00", ende:"20.06.2026 22:00",
+        text:"Geplante Wartungsarbeiten am zentralen Druckserver. In diesem Zeitraum kann es zu Verzögerungen beim Drucken kommen.", updates:[] },
+      { id: 1, typ:"info", titel:"Neue Telefonanlage ab 01.07.", system:"Telefonie", standort:"Alle",
+        beginn:"", ende:"", text:"Zum 01.07.2026 wird die neue Telefonanlage in Betrieb genommen. Weitere Informationen folgen per Hausmitteilung.", updates:[] }
+    ]
+  };
+
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+  function esc(s){return String(s||"").replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+
+  // ---- Liste rendern ----
+  var liste = document.getElementById("liste");
+  function renderListe(){
+    var items = state.entries.slice().sort(function(a,b){return (b.id||0)-(a.id||0);});
+    if(!items.length){ liste.innerHTML = '<div class="empty">Noch keine Meldungen. Lege mit „+ Neue Meldung“ los.</div>'; return; }
+    liste.innerHTML = items.map(function(m){
+      var sub = [m.system, m.standort, (m.beginn||"")].filter(Boolean).join(" · ");
+      return '<div class="item '+m.typ+'">'+
+        '<span class="badge '+m.typ+'">'+(TYP_LABEL[m.typ]||m.typ)+'</span>'+
+        '<div class="info-col"><h3>'+esc(m.titel)+'</h3><div class="sub">'+esc(sub||"—")+'</div></div>'+
+        '<div class="actions">'+
+          '<button class="btn btn-ghost btn-sm" data-up="'+m.id+'">▲</button>'+
+          '<button class="btn btn-ghost btn-sm" data-down="'+m.id+'">▼</button>'+
+          '<button class="btn btn-ghost btn-sm" data-edit="'+m.id+'">Bearbeiten</button>'+
+          '<button class="btn btn-danger btn-sm" data-del="'+m.id+'">Löschen</button>'+
+        '</div></div>';
+    }).join("");
+  }
+
+  // Reihenfolge wird über id gesteuert (höher = weiter oben). Hoch/Runter tauscht ids.
+  function findIndexSorted(id){
+    var s = state.entries.slice().sort(function(a,b){return (b.id||0)-(a.id||0);});
+    for(var i=0;i<s.length;i++){ if(s[i].id==id) return {arr:s, i:i}; }
+    return null;
+  }
+  function swapIds(idA, idB){
+    var a=getById(idA), b=getById(idB); if(!a||!b) return;
+    var t=a.id; a.id=b.id; b.id=t; save(); renderListe();
+  }
+  function getById(id){ for(var i=0;i<state.entries.length;i++){ if(state.entries[i].id==id) return state.entries[i]; } return null; }
+
+  liste.addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    if(b.dataset.edit) openEditor(getById(b.dataset.edit));
+    else if(b.dataset.del){ if(confirm("Diese Meldung wirklich löschen?")){ state.entries=state.entries.filter(function(m){return m.id!=b.dataset.del;}); save(); renderListe(); } }
+    else if(b.dataset.up){ var r=findIndexSorted(b.dataset.up); if(r&&r.i>0) swapIds(r.arr[r.i].id, r.arr[r.i-1].id); }
+    else if(b.dataset.down){ var r=findIndexSorted(b.dataset.down); if(r&&r.i<r.arr.length-1) swapIds(r.arr[r.i].id, r.arr[r.i+1].id); }
+  });
+
+  // ---- Editor ----
+  var dlg=document.getElementById("dlg");
+  var updList=document.getElementById("updList");
+
+  function updRow(zeit,text){
+    var div=document.createElement("div"); div.className="upd-row";
+    div.innerHTML='<input placeholder="Zeit" value="'+esc(zeit||"").replace(/"/g,"&quot;")+'">'+
+      '<input placeholder="Was ist passiert?" value="'+esc(text||"").replace(/"/g,"&quot;")+'">'+
+      '<button type="button" class="btn btn-danger btn-sm">✕</button>';
+    div.querySelector("button").onclick=function(){ div.remove(); };
+    return div;
+  }
+  document.getElementById("addUpd").onclick=function(){
+    var now=new Date().toLocaleString("de-DE");
+    updList.appendChild(updRow(now,""));
+  };
+
+  function openEditor(m){
+    m = m || {};
+    document.getElementById("dlgTitel").textContent = m.id ? "Meldung bearbeiten" : "Neue Meldung";
+    document.getElementById("f_id").value = m.id || "";
+    document.getElementById("f_typ").value = m.typ || "stoerung";
+    document.getElementById("f_titel").value = m.titel || "";
+    document.getElementById("f_system").value = m.system || "";
+    document.getElementById("f_standort").value = m.standort || "";
+    document.getElementById("f_beginn").value = m.beginn || "";
+    document.getElementById("f_ende").value = m.ende || "";
+    document.getElementById("f_text").value = m.text || "";
+    updList.innerHTML="";
+    (m.updates||[]).forEach(function(u){ updList.appendChild(updRow(u.zeit,u.text)); });
+    dlg.showModal();
+  }
+  document.getElementById("neuBtn").onclick=function(){ openEditor(null); };
+
+  document.getElementById("form").addEventListener("submit", function(e){
+    e.preventDefault();
+    var id=document.getElementById("f_id").value;
+    var titel=document.getElementById("f_titel").value.trim();
+    var text=document.getElementById("f_text").value.trim();
+    if(!titel||!text) return;
+    var updates=[];
+    [].forEach.call(updList.querySelectorAll(".upd-row"), function(r){
+      var ins=r.querySelectorAll("input");
+      var z=ins[0].value.trim(), t=ins[1].value.trim();
+      if(z||t) updates.push({zeit:z,text:t});
+    });
+    var obj={
+      typ:document.getElementById("f_typ").value,
+      titel:titel,
+      system:document.getElementById("f_system").value.trim(),
+      standort:document.getElementById("f_standort").value.trim(),
+      beginn:document.getElementById("f_beginn").value.trim(),
+      ende:document.getElementById("f_ende").value.trim(),
+      text:text, updates:updates
+    };
+    if(id){ var ex=getById(id); for(var k in obj) ex[k]=obj[k]; }
+    else { obj.id=Math.floor(Date.now()/1000); state.entries.push(obj); }
+    save(); renderListe(); dlg.close();
+  });
+
+  // ---- Einstellungen ----
+  var dlgSet=document.getElementById("dlgSet");
+  document.getElementById("settingsBtn").onclick=function(){ document.getElementById("f_email").value=state.email||""; dlgSet.showModal(); };
+  document.getElementById("saveSet").onclick=function(){ state.email=document.getElementById("f_email").value.trim(); save(); dlgSet.close(); };
+
+  // ---- Import ----
+  document.getElementById("importBtn").onclick=function(){
+    var txt=document.getElementById("importText").value;
+    if(!txt.trim()){ alert("Bitte zuerst den Inhalt der daten.js einfügen."); return; }
+    try{
+      var w={}; new Function("window", txt)(w);
+      if(!w.STOERUNGEN) throw new Error("Keine STOERUNGEN gefunden");
+      if(!confirm("Aktuelle Liste durch importierte Daten ersetzen?")) return;
+      state.entries=w.STOERUNGEN; if(w.ADMIN_EMAIL) state.email=w.ADMIN_EMAIL;
+      save(); renderListe(); document.getElementById("importText").value="";
+      alert("Import erfolgreich: "+state.entries.length+" Meldung(en) übernommen.");
+    }catch(err){ alert("Import fehlgeschlagen: "+err.message); }
+  };
+
+  // ---- daten.js erzeugen ----
+  function jstr(s){ return '"'+String(s||"").replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\r?\n/g,"\\n")+'"'; }
+
+  function generate(){
+    var sorted = state.entries.slice().sort(function(a,b){return (b.id||0)-(a.id||0);});
+    var blocks = sorted.map(function(m){
+      var ups;
+      if(!m.updates||!m.updates.length){ ups="    updates: []"; }
+      else{
+        ups="    updates: [\n"+ m.updates.map(function(u){
+          return "      { zeit: "+jstr(u.zeit)+", text: "+jstr(u.text)+" }";
+        }).join(",\n") +"\n    ]";
+      }
+      return "  {\n"+
+        "    id: "+(m.id||Math.floor(Date.now()/1000))+",\n"+
+        "    typ: "+jstr(m.typ)+",\n"+
+        "    titel: "+jstr(m.titel)+",\n"+
+        "    system: "+jstr(m.system)+",\n"+
+        "    standort: "+jstr(m.standort)+",\n"+
+        "    beginn: "+jstr(m.beginn)+",\n"+
+        "    ende: "+jstr(m.ende)+",\n"+
+        "    text: "+jstr(m.text)+",\n"+
+        ups+"\n"+
+        "  }";
+    }).join(",\n");
+
+    return "/* =========================================================================\n"+
+      "   STÖRUNGSMELDER – Datendatei\n"+
+      "   Erzeugt vom Admin-Tool am "+new Date().toLocaleString("de-DE")+"\n"+
+      "   Diese Datei komplett ersetzen und speichern.\n"+
+      "   ========================================================================= */\n\n"+
+      "window.STOERUNGEN = [\n"+ blocks +"\n];\n\n"+
+      "/* E-Mail-Adresse des Admins, an die Meldungen aus dem Formular gehen */\n"+
+      "window.ADMIN_EMAIL = "+jstr(state.email)+";\n";
+  }
+
+  var dlgOut=document.getElementById("dlgOut");
+  document.getElementById("genBtn").onclick=function(){
+    document.getElementById("out").value=generate();
+    document.getElementById("flash").textContent="";
+    dlgOut.showModal();
+  };
+  document.getElementById("copyBtn").onclick=function(){
+    var ta=document.getElementById("out"); ta.focus(); ta.select();
+    var ok=false; try{ ok=document.execCommand("copy"); }catch(e){}
+    if(navigator.clipboard){ navigator.clipboard.writeText(ta.value).then(function(){},function(){}); ok=true; }
+    document.getElementById("flash").textContent = ok ? "✓ kopiert!" : "markiert – jetzt STRG+C";
+  };
+
+  // ---- Dialog schließen Buttons ----
+  document.addEventListener("click", function(e){
+    var b=e.target.closest("[data-close]"); if(!b) return;
+    var d=b.closest("dialog"); if(d) d.close();
+  });
+
+  renderListe();
+})();
+</script>
+</body>
+</html>
