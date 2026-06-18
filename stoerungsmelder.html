@@ -144,9 +144,9 @@
     </div>
     <div class="modal-body">
       <div class="hint">
-        Deine Meldung wird als fertige <b>Outlook-Mail</b> an den Admin erzeugt
-        (inkl. fertigem Code-Block zum Einfügen).
-        Bitte nur noch in Outlook auf <b>Senden</b> klicken.
+        Deine Meldung wird als fertige <b>Outlook-Mail</b> an die IT erzeugt.
+        Bitte einfach in Outlook auf <b>Senden</b> klicken – um den Rest
+        kümmert sich die IT.
       </div>
       <div class="field">
         <label>Art der Meldung</label>
@@ -280,6 +280,46 @@
   document.getElementById("closeDlg").addEventListener("click",function(){dlg.close();});
   document.getElementById("cancelDlg").addEventListener("click",function(){dlg.close();});
 
+  // String inkl. Anführungszeichen für daten.js-Quelltext
+  function jstr(s){return '"'+String(s||"")
+    .replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\r?\n/g,"\\n")+'"';}
+
+  // Komplette daten.js aus aktuellem Stand + (optional) neuer Meldung erzeugen
+  function buildDatenJs(neu){
+    var alle = (neu ? [neu] : []).concat(DATA)
+      .slice().sort(function(a,b){return (b.id||0)-(a.id||0);});
+    var blocks = alle.map(function(m){
+      var ups;
+      if(!m.updates || !m.updates.length){ ups="    updates: []"; }
+      else{
+        ups="    updates: [\n"+ m.updates.map(function(u){
+          return "      { zeit: "+jstr(u.zeit)+", text: "+jstr(u.text)+" }";
+        }).join(",\n") +"\n    ]";
+      }
+      return "  {\n"+
+        "    id: "+(m.id||Math.floor(Date.now()/1000))+",\n"+
+        "    typ: "+jstr(m.typ)+",\n"+
+        "    titel: "+jstr(m.titel)+",\n"+
+        "    system: "+jstr(m.system)+",\n"+
+        "    standort: "+jstr(m.standort)+",\n"+
+        "    beginn: "+jstr(m.beginn)+",\n"+
+        "    ende: "+jstr(m.ende)+",\n"+
+        "    text: "+jstr(m.text)+",\n"+
+        ups+"\n"+
+        "  }";
+    }).join(",\n");
+    var tools = (window.TOOLS||[]).map(function(t){
+      return "  {\n"+
+        "    name: "+jstr(t.name)+",\n"+
+        "    pfad: "+jstr(t.pfad)+",\n"+
+        "    beschreibung: "+jstr(t.beschreibung)+"\n"+
+        "  }";
+    }).join(",\n");
+    return "window.STOERUNGEN = [\n"+ blocks +"\n];\n\n"+
+      "window.ADMIN_EMAIL = "+jstr(ADMIN)+";\n\n"+
+      "window.TOOLS = [\n"+ tools +"\n];\n";
+  }
+
   document.getElementById("meldeForm").addEventListener("submit",function(e){
     e.preventDefault();
     var typ = document.getElementById("f_typ").value;
@@ -294,34 +334,34 @@
     if(!titel || !text) return;
 
     var jetzt = new Date();
-    var id = Math.floor(jetzt.getTime()/1000); // eindeutig, neueste oben
     var zeitStr = jetzt.toLocaleString("de-DE");
 
-    // Fertiger Code-Block für daten.js – Admin fügt ihn nur oben in die Liste ein
-    var codeBlock =
-      "  {\n"+
-      "    id: "+id+",\n"+
-      "    typ: \""+typ+"\",\n"+
-      "    titel: \""+js(titel)+"\",\n"+
-      "    system: \""+js(sys)+"\",\n"+
-      "    standort: \""+js(ort)+"\",\n"+
-      "    beginn: \""+js(beginn)+"\",\n"+
-      "    ende: \""+js(ende)+"\",\n"+
-      "    text: \""+js(text)+"\",\n"+
-      "    updates: [\n"+
-      "      { zeit: \""+js(zeitStr)+"\", text: \"Gemeldet von "+js(name||"-")+(tel?(" ("+js(tel)+")"):"")+"\" }\n"+
-      "    ]\n"+
-      "  },";
+    // Neue Meldung als Objekt – wird oben in die Liste einsortiert
+    var neu = {
+      id: Math.floor(jetzt.getTime()/1000),
+      typ: typ, titel: titel, system: sys, standort: ort,
+      beginn: beginn, ende: ende, text: text,
+      updates: [{ zeit: zeitStr, text: "Gemeldet von "+(name||"-")+(tel?(" ("+tel+")"):"") }]
+    };
+
+    var datenJs = buildDatenJs(neu);
 
     var betreff = "[Störungsmelder] "+(TYP_LABEL[typ]||typ)+": "+titel;
     var body =
-      "Neue Meldung über den Störungsmelder\n"+
-      "Gemeldet: "+zeitStr+" von "+(name||"-")+(tel?(" ("+tel+")"):"")+"\n\n"+
-      "============================================================\n"+
-      "ANLEITUNG: Den folgenden Block oben in die Liste in daten.js\n"+
-      "einfügen (direkt nach 'window.STOERUNGEN = [') und speichern.\n"+
-      "============================================================\n\n"+
-      codeBlock+"\n";
+      "Hallo,\n\n"+
+      "über die Störungsmelder-Seite wurde eine neue Meldung erfasst:\n\n"+
+      "  Art:      "+(TYP_LABEL[typ]||typ)+"\n"+
+      "  Titel:    "+titel+"\n"+
+      "  System:   "+(sys||"-")+"\n"+
+      "  Standort: "+(ort||"-")+"\n"+
+      "  Von:      "+(name||"-")+(tel?(" ("+tel+")"):"")+"\n"+
+      "  Zeit:     "+zeitStr+"\n\n"+
+      "Bitte einfach abschicken – die folgenden technischen Angaben benötigt\n"+
+      "die IT zur schnellen Veröffentlichung. Danke!\n\n"+
+      "------------------------------------------------------------\n"+
+      "Aktualisierter Inhalt für daten.js (kompletter Stand inkl. neuer Meldung)\n"+
+      "------------------------------------------------------------\n\n"+
+      datenJs;
 
     var href = "mailto:"+encodeURIComponent(ADMIN)+
       "?subject="+encodeURIComponent(betreff)+
