@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Italian Hairdesign – Ihr Friseursalon in Frankfurt</title>
+    <meta name="description" content="Italian Hairdesign – Ihr Friseursalon für Haarschnitt, Nägel & Solarium in Frankfurt am Main. Inhaberin M. Abbenante.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --pink: #d4145a;
+            --pink-light: #e91e80;
+            --gold: #c9a84c;
+            --gold-light: #e0c068;
+            --dark: #1a1118;
+            --dark-card: #231a20;
+            --text: #f0e6eb;
+            --text-muted: #b8a0ab;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ── Ornamental SVG swirls ── */
+        .swirl {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        /* ── Navigation ── */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            background: linear-gradient(180deg, rgba(26,17,24,0.95) 0%, transparent 100%);
+            transition: background 0.3s;
+        }
+
+        nav.scrolled {
+            background: rgba(26,17,24,0.97);
+            backdrop-filter: blur(10px);
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            font-weight: 300;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--gold);
+        }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 70% 20%, rgba(212,20,90,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 30% 80%, rgba(201,168,76,0.08) 0%, transparent 50%);
+        }
+
+        .hero-ornament {
+            position: absolute;
+            top: -80px;
+            right: -80px;
+            width: 500px;
+            height: 500px;
+            opacity: 0.12;
+        }
+
+        .hero-ornament-left {
+            position: absolute;
+            bottom: -100px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            opacity: 0.08;
+            transform: rotate(180deg);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 7vw, 5rem);
+            font-weight: 400;
+            color: var(--pink);
+            margin-bottom: 0.25em;
+            letter-spacing: 2px;
+        }
+
+        .hero h1 span {
+            display: block;
+            font-style: italic;
+            color: var(--gold);
+            font-size: 0.6em;
+            letter-spacing: 4px;
+        }
+
+        .hero-divider {
+            width: 120px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 1.5rem auto;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            font-weight: 300;
+            color: var(--text-muted);
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            letter-spacing: 1px;
+        }
+
+        .hero-cta {
+            display: inline-block;
+            padding: 0.9rem 2.5rem;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-cta::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gold);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s;
+            z-index: -1;
+        }
+
+        .hero-cta:hover {
+            color: var(--dark);
+        }
+
+        .hero-cta:hover::before {
+            transform: scaleX(1);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .scroll-indicator span {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .scroll-indicator svg {
+            width: 20px;
+            stroke: var(--gold);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        /* ── Sections ── */
+        section {
+            padding: 6rem 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            color: var(--pink);
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-weight: 300;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            margin-bottom: 3rem;
+        }
+
+        .section-divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 1rem auto 1.5rem;
+        }
+
+        /* ── Services ── */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-card {
+            background: linear-gradient(135deg, var(--dark-card) 0%, rgba(35,26,32,0.5) 100%);
+            border: 1px solid rgba(201,168,76,0.12);
+            border-radius: 2px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--pink), var(--gold));
+            transform: scaleX(0);
+            transition: transform 0.4s;
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(201,168,76,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .service-icon svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--gold);
+            fill: none;
+            stroke-width: 1.2;
+        }
+
+        .service-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--gold-light);
+            margin-bottom: 0.75rem;
+        }
+
+        .service-card p {
+            color: var(--text-muted);
+            font-weight: 300;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* ── About ── */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text p {
+            color: var(--text-muted);
+            font-weight: 300;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-text p:first-child::first-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            color: var(--pink);
+            float: left;
+            margin-right: 0.5rem;
+            line-height: 1;
+        }
+
+        .about-image {
+            position: relative;
+        }
+
+        .about-image-frame {
+            width: 100%;
+            aspect-ratio: 3/4;
+            background: linear-gradient(135deg, var(--dark-card), rgba(212,20,90,0.1));
+            border: 1px solid rgba(201,168,76,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-image-frame::before {
+            content: '';
+            position: absolute;
+            inset: 12px;
+            border: 1px solid rgba(201,168,76,0.1);
+        }
+
+        .about-image-frame svg {
+            width: 120px;
+            height: 120px;
+            stroke: var(--gold);
+            opacity: 0.3;
+            fill: none;
+            stroke-width: 0.8;
+        }
+
+        .about-highlight {
+            color: var(--gold) !important;
+            font-style: italic;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+        }
+
+        /* ── Hours & Contact ── */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .contact-block {
+            background: linear-gradient(135deg, var(--dark-card), rgba(35,26,32,0.3));
+            border: 1px solid rgba(201,168,76,0.1);
+            padding: 2.5rem;
+            border-radius: 2px;
+        }
+
+        .contact-block h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--gold-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .hours-table {
+            width: 100%;
+        }
+
+        .hours-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(201,168,76,0.06);
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .hours-row:last-child {
+            border: none;
+        }
+
+        .hours-row .day {
+            color: var(--text);
+        }
+
+        .hours-row.closed .time {
+            color: var(--pink);
+            font-style: italic;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .contact-item svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--gold);
+            fill: none;
+            stroke-width: 1.5;
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+
+        .contact-item .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .contact-item .value {
+            color: var(--text);
+            font-weight: 300;
+        }
+
+        .contact-item a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .contact-item a:hover {
+            color: var(--gold);
+        }
+
+        /* ── Map ── */
+        .map-container {
+            margin-top: 3rem;
+            border: 1px solid rgba(201,168,76,0.12);
+            overflow: hidden;
+            border-radius: 2px;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 300px;
+            border: 0;
+            filter: grayscale(0.8) brightness(0.6) contrast(1.2);
+            transition: filter 0.4s;
+        }
+
+        .map-container:hover iframe {
+            filter: grayscale(0.3) brightness(0.8) contrast(1.1);
+        }
+
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(201,168,76,0.08);
+            position: relative;
+        }
+
+        footer .footer-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--pink);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* ── Animations ── */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            nav {
+                gap: 1rem;
+                padding: 0.8rem 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            nav a {
+                font-size: 0.75rem;
+                letter-spacing: 1px;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .about-image {
+                order: -1;
+            }
+
+            .about-image-frame {
+                aspect-ratio: 16/9;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            section {
+                padding: 4rem 1.5rem;
+            }
+
+            .hero-ornament {
+                width: 300px;
+                height: 300px;
+                top: -40px;
+                right: -60px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                gap: 0.6rem;
+            }
+            nav a {
+                font-size: 0.7rem;
+                letter-spacing: 0.5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav id="navbar">
+    <a href="#home">Home</a>
+    <a href="#leistungen">Leistungen</a>
+    <a href="#ueber-uns">Über uns</a>
+    <a href="#kontakt">Kontakt</a>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero" id="home">
+    <!-- Ornamental swirl top-right -->
+    <svg class="hero-ornament" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M450 50 C400 100 380 180 400 250 C420 320 350 380 280 360 C210 340 250 280 300 300 C350 320 330 370 280 360" stroke="url(#g1)" stroke-width="1.5" fill="none"/>
+        <path d="M480 20 C420 80 400 200 430 280 C460 360 370 430 290 400 C210 370 260 300 320 320 C380 340 350 400 290 400" stroke="url(#g1)" stroke-width="1" fill="none"/>
+        <circle cx="280" cy="360" r="40" stroke="url(#g1)" stroke-width="1" fill="none"/>
+        <circle cx="280" cy="360" r="20" stroke="url(#g1)" stroke-width="1.5" fill="none"/>
+        <path d="M350 150 C320 180 330 220 360 230 C390 240 400 210 380 195 C360 180 340 200 360 215" stroke="url(#g1)" stroke-width="1" fill="none"/>
+        <path d="M420 80 C390 120 400 170 430 180 C460 190 465 155 445 145 C425 135 410 160 430 170" stroke="url(#g1)" stroke-width="1" fill="none"/>
+        <defs>
+            <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#d4145a"/>
+                <stop offset="50%" stop-color="#c9a84c"/>
+                <stop offset="100%" stop-color="#d4145a"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- Ornamental swirl bottom-left -->
+    <svg class="hero-ornament-left" viewBox="0 0 400 400" fill="none">
+        <path d="M350 50 C300 100 280 180 300 250 C320 320 250 380 180 360 C110 340 150 280 200 300 C250 320 230 370 180 360" stroke="url(#g2)" stroke-width="1.5" fill="none"/>
+        <circle cx="180" cy="360" r="30" stroke="url(#g2)" stroke-width="1" fill="none"/>
+        <circle cx="180" cy="360" r="15" stroke="url(#g2)" stroke-width="1.5" fill="none"/>
+        <defs>
+            <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#c9a84c"/>
+                <stop offset="100%" stop-color="#d4145a"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="hero-content fade-in">
+        <h1>
+            Italian Hairdesign
+            <span>Frankfurt am Main</span>
+        </h1>
+        <div class="hero-divider"></div>
+        <p>Ihr Friseursalon für Haarschnitt, Nägel & Solarium</p>
+        <a href="#kontakt" class="hero-cta">Termin vereinbaren</a>
+    </div>
+
+    <div class="scroll-indicator">
+        <span>Mehr entdecken</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+        </svg>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section id="leistungen">
+    <h2 class="section-title fade-in">Unsere Leistungen</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle fade-in">Schönheit mit italienischem Flair</p>
+
+    <div class="services-grid">
+        <div class="service-card fade-in">
+            <div class="service-icon">
+                <svg viewBox="0 0 48 48">
+                    <path d="M24 4C18 4 14 8 14 14C14 20 18 26 24 28C30 26 34 20 34 14C34 8 30 4 24 4Z"/>
+                    <path d="M12 28L8 44H16L18 36"/>
+                    <path d="M36 28L40 44H32L30 36"/>
+                    <path d="M20 28L22 44H26L28 28"/>
+                    <line x1="14" y1="14" x2="34" y2="14"/>
+                </svg>
+            </div>
+            <h3>Haarschnitt</h3>
+            <p>Professionelle Haarschnitte für Damen und Herren – von klassisch bis modern, individuell auf Sie abgestimmt.</p>
+        </div>
+
+        <div class="service-card fade-in">
+            <div class="service-icon">
+                <svg viewBox="0 0 48 48">
+                    <path d="M24 6L22 20H26L24 6Z"/>
+                    <path d="M20 20C20 20 16 22 16 28C16 34 20 38 24 42C28 38 32 34 32 28C32 22 28 20 28 20"/>
+                    <ellipse cx="24" cy="28" rx="4" ry="6"/>
+                    <line x1="20" y1="8" x2="18" y2="4"/>
+                    <line x1="28" y1="8" x2="30" y2="4"/>
+                </svg>
+            </div>
+            <h3>Nageldesign</h3>
+            <p>Perfekte Maniküre und kreatives Nageldesign – gepflegte Hände für jeden Anlass.</p>
+        </div>
+
+        <div class="service-card fade-in">
+            <div class="service-icon">
+                <svg viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="10"/>
+                    <line x1="24" y1="4" x2="24" y2="10"/>
+                    <line x1="24" y1="38" x2="24" y2="44"/>
+                    <line x1="4" y1="24" x2="10" y2="24"/>
+                    <line x1="38" y1="24" x2="44" y2="24"/>
+                    <line x1="9.86" y1="9.86" x2="14.1" y2="14.1"/>
+                    <line x1="33.9" y1="33.9" x2="38.14" y2="38.14"/>
+                    <line x1="9.86" y1="38.14" x2="14.1" y2="33.9"/>
+                    <line x1="33.9" y1="14.1" x2="38.14" y2="9.86"/>
+                </svg>
+            </div>
+            <h3>Solarium</h3>
+            <p>Entspannen Sie bei einer Solarium-Sitzung und genießen Sie eine gleichmäßige, natürliche Bräune.</p>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="ueber-uns">
+    <h2 class="section-title fade-in">Über uns</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle fade-in">Leidenschaft für Stil & Schönheit</p>
+
+    <div class="about-content">
+        <div class="about-text fade-in">
+            <p>Willkommen bei Italian Hairdesign in Frankfurt am Main. Unser Salon verbindet italienische Eleganz mit modernster Haarstyling-Kunst. Inhaberin M. Abbenante und ihr Team bringen jahrelange Erfahrung und echte Leidenschaft für Schönheit mit.</p>
+            <p>Bei uns stehen Sie im Mittelpunkt. Wir nehmen uns Zeit für eine persönliche Beratung und finden gemeinsam den perfekten Look für Sie – ob Haarschnitt, Styling, Nageldesign oder eine entspannende Solarium-Sitzung.</p>
+            <p class="about-highlight">„Bellezza è passione" – Schönheit ist unsere Leidenschaft.</p>
+        </div>
+        <div class="about-image fade-in">
+            <div class="about-image-frame">
+                <svg viewBox="0 0 120 120">
+                    <path d="M60 10 C40 10 25 25 25 45 C25 65 40 85 60 95 C80 85 95 65 95 45 C95 25 80 10 60 10Z"/>
+                    <path d="M40 45 C40 35 48 28 60 28 C72 28 80 35 80 45"/>
+                    <path d="M35 50 L30 100 M45 50 L42 100 M55 50 L55 100 M65 50 L65 100 M75 50 L78 100 M85 50 L90 100"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="kontakt">
+    <h2 class="section-title fade-in">Kontakt & Öffnungszeiten</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle fade-in">Wir freuen uns auf Ihren Besuch</p>
+
+    <div class="contact-grid">
+        <div class="contact-block fade-in">
+            <h3>Öffnungszeiten</h3>
+            <div class="hours-table">
+                <div class="hours-row closed">
+                    <span class="day">Montag</span>
+                    <span class="time">Geschlossen</span>
+                </div>
+                <div class="hours-row">
+                    <span class="day">Dienstag</span>
+                    <span class="time">9:00 – 18:00 Uhr</span>
+                </div>
+                <div class="hours-row">
+                    <span class="day">Mittwoch</span>
+                    <span class="time">9:00 – 18:00 Uhr</span>
+                </div>
+                <div class="hours-row">
+                    <span class="day">Donnerstag</span>
+                    <span class="time">9:00 – 18:00 Uhr</span>
+                </div>
+                <div class="hours-row">
+                    <span class="day">Freitag</span>
+                    <span class="time">9:00 – 18:00 Uhr</span>
+                </div>
+                <div class="hours-row">
+                    <span class="day">Samstag</span>
+                    <span class="time">9:00 – 13:00 Uhr</span>
+                </div>
+                <div class="hours-row closed">
+                    <span class="day">Sonntag</span>
+                    <span class="time">Geschlossen</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-block fade-in">
+            <h3>So erreichen Sie uns</h3>
+
+            <div class="contact-item">
+                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <div>
+                    <div class="label">Adresse</div>
+                    <div class="value">Herxheimerstr. 19<br>60326 Frankfurt am Main</div>
+                </div>
+            </div>
+
+            <div class="contact-item">
+                <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <div>
+                    <div class="label">Telefon</div>
+                    <div class="value"><a href="tel:06984770130">069 / 847 701 30</a></div>
+                </div>
+            </div>
+
+            <div class="contact-item">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <div>
+                    <div class="label">E-Mail</div>
+                    <div class="value"><a href="mailto:MA_Hairdesign@gmx.de">MA_Hairdesign@gmx.de</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Maps -->
+    <div class="map-container fade-in">
+        <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2558.8!2d8.6345!3d50.0985!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47bd0937c7f20001%3A0x4b39e39e7e6e35f0!2sHerxheimerstra%C3%9Fe%2019%2C%2060326%20Frankfurt%20am%20Main!5e0!3m2!1sde!2sde!4v1"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Standort Italian Hairdesign">
+        </iframe>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-brand">Italian Hairdesign</div>
+    <p>Inh. M. Abbenante · Herxheimerstr. 19 · 60326 Frankfurt am Main</p>
+</footer>
+
+<script>
+    // Scroll-triggered fade-in animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Active nav link
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('nav a');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const top = section.offsetTop - 100;
+            if (scrollY >= top) {
+                current = section.getAttribute('id');
+            }
+        });
+        navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+        });
+    });
+</script>
+
+</body>
+</html>
